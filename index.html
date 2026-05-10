@@ -1,0 +1,4251 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>副本校园 - 游戏化运动激励工具</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%2392bd83'/%3E%3Cpath d='M10 34c0-13 9-22 22-22s22 9 22 22v5c0 8-6 13-14 13H24c-8 0-14-5-14-13v-5Z' fill='%237b56f4'/%3E%3Cpath d='M10 38h44v2c0 8-6 12-14 12H24c-8 0-14-4-14-12v-2Z' fill='%236947dd'/%3E%3Ccircle cx='24' cy='30' r='4' fill='white'/%3E%3Ccircle cx='40' cy='30' r='4' fill='white'/%3E%3C/svg%3E" />
+    <style>
+      :root {
+        --ink: #20232a;
+        --muted: #6c737f;
+        --line: #dce2ea;
+        --paper: #f6f2ea;
+        --surface: #fffdf8;
+        --surface-2: #eef7f1;
+        --green: #147a64;
+        --green-2: #1f9d78;
+        --coral: #e75f48;
+        --amber: #f2b84b;
+        --teal: #2a8ca0;
+        --shadow: 0 18px 42px rgba(31, 42, 55, 0.12);
+        --radius: 18px;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+          sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, rgba(255, 253, 248, 0.85), rgba(246, 242, 234, 0.96)),
+          url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d7cdbb' stroke-width='1' stroke-opacity='0.36'%3E%3Cpath d='M0 20h120M0 60h120M0 100h120M20 0v120M60 0v120M100 0v120'/%3E%3C/g%3E%3C/svg%3E");
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        border: 0;
+        cursor: pointer;
+        color: inherit;
+      }
+
+      .app {
+        width: min(100%, 460px);
+        min-height: 100vh;
+        margin: 0 auto;
+        background: var(--paper);
+        box-shadow: 0 0 0 1px rgba(32, 35, 42, 0.06);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .screen {
+        min-height: 100vh;
+        padding: 18px 18px 94px;
+      }
+
+      .screen.without-nav {
+        padding-bottom: 24px;
+      }
+
+      .statusbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 2px 2px 14px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 11px;
+        display: grid;
+        place-items: center;
+        background: var(--ink);
+        color: #fff;
+        box-shadow: 0 10px 24px rgba(32, 35, 42, 0.18);
+      }
+
+      .mark.app-mark {
+        overflow: hidden;
+        background: linear-gradient(135deg, #93bd84, #74a874);
+        box-shadow: 0 10px 24px rgba(115, 80, 214, 0.22);
+      }
+
+      .app-monster {
+        width: 27px;
+        height: 23px;
+        border-radius: 13px 13px 9px 9px;
+        position: relative;
+        background: linear-gradient(180deg, #865df7, #6f4fe4);
+        box-shadow: inset 0 -6px 0 rgba(32, 35, 42, 0.12);
+      }
+
+      .app-monster::before,
+      .app-monster::after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #fff;
+      }
+
+      .app-monster::before {
+        left: 8px;
+      }
+
+      .app-monster::after {
+        right: 8px;
+      }
+
+      .mark svg,
+      .icon svg,
+      .btn svg,
+      .badge-icon svg,
+      .nav-btn svg,
+      .medal svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+        flex: 0 0 auto;
+        display: block;
+      }
+
+      .hero {
+        min-height: calc(100vh - 42px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .hero-main {
+        flex: 1;
+        display: grid;
+        align-content: start;
+        gap: 18px;
+      }
+
+      .hero-art {
+        height: clamp(226px, 42vh, 330px);
+        border-radius: 28px;
+        overflow: hidden;
+        position: relative;
+        background:
+          radial-gradient(circle at 72% 24%, rgba(191, 90, 242, 0.32), transparent 34%),
+          radial-gradient(circle at 18% 20%, rgba(0, 245, 255, 0.18), transparent 34%),
+          linear-gradient(145deg, rgba(20, 22, 44, 0.96), rgba(42, 20, 72, 0.92) 54%, rgba(9, 37, 51, 0.94));
+        border: 1px solid rgba(32, 35, 42, 0.1);
+        box-shadow: var(--shadow);
+      }
+
+      .hero-art::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(180deg, rgba(12, 20, 34, 0.1), rgba(12, 20, 34, 0.42)),
+          url("./用户附件2.png") center / cover no-repeat;
+        opacity: 0.3;
+      }
+
+      .hero-boss-stage {
+        position: absolute;
+        left: 22px;
+        right: 22px;
+        top: 24px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        z-index: 1;
+      }
+
+      .hero-boss {
+        display: grid;
+        gap: 9px;
+        justify-items: center;
+        align-items: center;
+        padding: 12px 9px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(14px);
+      }
+
+      .hero-boss-avatar {
+        width: 66px;
+        height: 58px;
+        border-radius: var(--shape, 22px 22px 17px 17px);
+        position: relative;
+        background: linear-gradient(135deg, var(--boss-a), var(--boss-b));
+        box-shadow: inset 0 -12px 0 rgba(0, 0, 0, 0.16), 0 12px 28px rgba(0, 0, 0, 0.22);
+      }
+
+      .hero-boss-avatar::before,
+      .hero-boss-avatar::after {
+        content: "";
+        position: absolute;
+        top: 18px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.94);
+      }
+
+      .hero-boss-avatar::before {
+        left: 18px;
+      }
+
+      .hero-boss-avatar::after {
+        right: 18px;
+      }
+
+      .hero-boss-avatar i {
+        position: absolute;
+        left: 50%;
+        top: -13px;
+        width: 34px;
+        height: 18px;
+        transform: translateX(-50%);
+      }
+
+      .hero-boss-avatar i.crown {
+        background: #ffd60a;
+        clip-path: polygon(0 100%, 16% 35%, 34% 100%, 50% 18%, 66% 100%, 84% 35%, 100% 100%);
+      }
+
+      .hero-boss-avatar i.cap {
+        top: -10px;
+        border-radius: 14px 14px 6px 6px;
+        background: #c7d2fe;
+        transform: translateX(-50%) rotate(-12deg);
+      }
+
+      .hero-boss-avatar i.dorm {
+        top: -8px;
+        width: 28px;
+        height: 16px;
+        border-radius: 7px 7px 3px 3px;
+        background: #25314a;
+      }
+
+      .hero-boss-bar {
+        width: 100%;
+        height: 7px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .hero-boss-bar span {
+        display: block;
+        width: var(--value);
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ff375f, #ff9f0a);
+      }
+
+      .hero-boss b {
+        color: #fff;
+        font-size: 13px;
+        line-height: 1.1;
+      }
+
+      .hero-boss-copy {
+        position: absolute;
+        left: 22px;
+        right: 22px;
+        bottom: 20px;
+        z-index: 1;
+        display: grid;
+        gap: 6px;
+        padding: 14px;
+        border-radius: 18px;
+        background: rgba(255, 253, 248, 0.9);
+        backdrop-filter: blur(12px);
+      }
+
+      .hero-boss-copy b {
+        font-size: 17px;
+      }
+
+      .hero-boss-copy .sub {
+        line-height: 1.45;
+      }
+
+      .hero h1,
+      .page-title h1 {
+        margin: 0;
+        color: var(--ink);
+        line-height: 1.06;
+        letter-spacing: 0;
+      }
+
+      .hero h1 {
+        font-size: clamp(34px, 9vw, 43px);
+        max-width: 8em;
+        line-height: 1.12;
+      }
+
+      .page-title h1 {
+        font-size: 28px;
+      }
+
+      .hero p,
+      .sub {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.65;
+        font-size: 15px;
+      }
+
+      .hero-actions {
+        display: grid;
+        gap: 10px;
+      }
+
+      .btn {
+        min-height: 48px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 18px;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+      }
+
+      .btn.primary {
+        background: var(--green);
+        color: #fff;
+        box-shadow: 0 12px 26px rgba(20, 122, 100, 0.24);
+      }
+
+      .btn.dark {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .btn.ghost {
+        background: rgba(255, 253, 248, 0.76);
+        color: var(--ink);
+        border: 1px solid rgba(32, 35, 42, 0.1);
+      }
+
+      .btn.small {
+        min-height: 36px;
+        border-radius: 11px;
+        padding: 0 12px;
+        font-size: 13px;
+      }
+
+      .btn:disabled {
+        opacity: 0.58;
+        cursor: not-allowed;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .page-title {
+        display: grid;
+        gap: 7px;
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .chip {
+        min-height: 38px;
+        border-radius: 999px;
+        padding: 0 14px;
+        background: rgba(255, 253, 248, 0.9);
+        color: var(--muted);
+        border: 1px solid rgba(32, 35, 42, 0.1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      .chip.active {
+        background: var(--ink);
+        color: #fff;
+        border-color: var(--ink);
+      }
+
+      .panel {
+        background: var(--surface);
+        border: 1px solid rgba(32, 35, 42, 0.09);
+        border-radius: var(--radius);
+        padding: 16px;
+        box-shadow: 0 10px 26px rgba(31, 42, 55, 0.08);
+      }
+
+      .panel.flat {
+        box-shadow: none;
+      }
+
+      .stack {
+        display: grid;
+        gap: 14px;
+      }
+
+      .question {
+        display: grid;
+        gap: 10px;
+      }
+
+      .question h2,
+      .card-title,
+      .section-title {
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.35;
+        letter-spacing: 0;
+      }
+
+      .progress-line {
+        height: 8px;
+        border-radius: 99px;
+        background: rgba(32, 35, 42, 0.1);
+        overflow: hidden;
+      }
+
+      .progress-line span {
+        display: block;
+        height: 100%;
+        width: var(--value);
+        background: var(--green);
+        border-radius: inherit;
+      }
+
+      .home-hero {
+        background:
+          linear-gradient(135deg, rgba(244, 96, 54, 0.96), rgba(245, 175, 64, 0.94) 54%, rgba(25, 130, 116, 0.94)),
+          var(--coral);
+        color: #fff;
+        border-radius: 24px;
+        padding: 18px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .home-hero::after,
+      .home-hero::before {
+        display: none;
+      }
+
+      .home-hero > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .home-hero h2 {
+        margin: 8px 0;
+        font-size: 25px;
+        line-height: 1.18;
+      }
+
+      .home-hero p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.86);
+        line-height: 1.55;
+      }
+
+      .task-plan {
+        display: grid;
+        gap: 5px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.45;
+        font-size: 15px;
+      }
+
+      .task-plan b {
+        color: #fff;
+        display: block;
+      }
+
+      .streak-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .streak-pill {
+        min-height: 30px;
+        padding: 0 11px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.16);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .streak-pill svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .streak-pill strong {
+        font-size: 13px;
+      }
+
+      .phase-strip {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+        justify-self: stretch;
+      }
+
+      .phase-chip {
+        min-height: 44px;
+        border-radius: 14px;
+        padding: 8px 6px;
+        background: rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.92);
+        display: grid;
+        place-items: center;
+        gap: 2px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+      }
+
+      .phase-chip b {
+        font-size: 13px;
+        line-height: 1.1;
+        color: #fff;
+      }
+
+      .phase-chip span {
+        font-size: 11px;
+        line-height: 1.1;
+        color: rgba(255, 255, 255, 0.74);
+      }
+
+      .timer-box .phase-chip {
+        min-height: 46px;
+        padding: 7px 4px;
+        border-radius: 12px;
+      }
+
+      .phase-chip.done {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .phase-chip.active {
+        background: rgba(255, 255, 255, 0.28);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      }
+
+      .phase-track {
+        display: grid;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .phase-track .phase-chip {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .phase-track .phase-chip.done {
+        background: rgba(255, 255, 255, 0.11);
+      }
+
+      .phase-track .phase-chip.active {
+        background: rgba(0, 245, 255, 0.18);
+      }
+
+      .phase-track .phase-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 11px;
+      }
+
+      .phase-track .phase-meta b {
+        color: #fff;
+      }
+
+      .journey-banner {
+        display: grid;
+        gap: 6px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(32, 35, 42, 0.06);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .journey-banner b {
+        font-size: 14px;
+      }
+
+      .journey-banner span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .quest-grid {
+        display: grid;
+        gap: 9px;
+      }
+
+      .quest-item {
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 11px;
+        border-radius: 16px;
+        background: rgba(255, 253, 248, 0.78);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .quest-item h3 {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .quest-item p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .quest-reward {
+        min-width: 54px;
+        padding: 7px 9px;
+        border-radius: 999px;
+        background: rgba(20, 122, 100, 0.1);
+        color: var(--green);
+        text-align: center;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .mission-panel {
+        background:
+          radial-gradient(circle at 14% 12%, rgba(255, 159, 10, 0.16), transparent 28%),
+          linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(238, 247, 241, 0.95));
+      }
+
+      .mission-route {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .mission-step {
+        min-width: 0;
+        min-height: 86px;
+        border-radius: 16px;
+        padding: 10px 6px;
+        display: grid;
+        justify-items: center;
+        align-content: center;
+        gap: 5px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .mission-step.done {
+        background: rgba(20, 122, 100, 0.1);
+        border-color: rgba(20, 122, 100, 0.18);
+      }
+
+      .mission-step.active {
+        background: #171a20;
+        color: #fff;
+        box-shadow: 0 14px 30px rgba(32, 35, 42, 0.16);
+      }
+
+      .mission-dot {
+        width: 26px;
+        height: 26px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        background: rgba(32, 35, 42, 0.08);
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 1000;
+      }
+
+      .mission-step.active .mission-dot {
+        background: var(--teal);
+        color: #fff;
+      }
+
+      .mission-step b {
+        max-width: 100%;
+        font-size: 12px;
+        line-height: 1.1;
+      }
+
+      .mission-step small {
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.1;
+      }
+
+      .mission-step.active small {
+        color: rgba(255, 255, 255, 0.66);
+      }
+
+      .mission-reward-row {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 10px;
+        align-items: center;
+        padding: 11px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .mission-reward-row b {
+        display: block;
+        font-size: 14px;
+        line-height: 1.25;
+      }
+
+      .mission-reward-row span:last-child {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .mission-reward-row b {
+        color: var(--ink);
+      }
+
+      .raid-card {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        gap: 16px;
+        text-align: left;
+        color: #fff;
+        background:
+          radial-gradient(circle at 88% 18%, rgba(255, 255, 255, 0.24), transparent 22%),
+          linear-gradient(135deg, #195a76, #1f9d78 58%, #f2b84b);
+        box-shadow: var(--shadow);
+      }
+
+      .raid-card[role="button"],
+      .mini-map,
+      .boss-preview.codex-link {
+        cursor: pointer;
+      }
+
+      .raid-card.featured {
+        min-height: 248px;
+        border-radius: 28px;
+        padding: 18px;
+      }
+
+      .raid-card .tiny,
+      .battle-stage .tiny {
+        color: rgba(255, 255, 255, 0.68);
+      }
+
+      .raid-card::after {
+        content: "";
+        position: absolute;
+        inset: auto -18px -38px auto;
+        width: 160px;
+        height: 160px;
+        border-radius: 42px;
+        background: rgba(255, 255, 255, 0.08);
+        transform: rotate(16deg);
+      }
+
+      .raid-card > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .raid-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        gap: 12px;
+      }
+
+      .raid-card h2 {
+        margin: 6px 0 4px;
+        font-size: 22px;
+        line-height: 1.14;
+        color: #fff;
+      }
+
+      .raid-card p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.86);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .boss-codex {
+        display: grid;
+        gap: 12px;
+      }
+
+      .boss-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .boss-card {
+        min-height: 102px;
+        border-radius: 16px;
+        padding: 9px 7px;
+        display: grid;
+        justify-items: center;
+        align-content: center;
+        gap: 6px;
+        background: rgba(255, 253, 248, 0.76);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .boss-card.active {
+        border-color: rgba(20, 122, 100, 0.34);
+        background: rgba(238, 247, 241, 0.9);
+      }
+
+      .boss-mini {
+        width: 42px;
+        height: 42px;
+        border-radius: var(--shape, 16px);
+        position: relative;
+        background: linear-gradient(135deg, var(--boss-a), var(--boss-b));
+        box-shadow: inset 0 -9px 0 rgba(32, 35, 42, 0.14);
+      }
+
+      .boss-mini i {
+        position: absolute;
+        left: 50%;
+        top: -11px;
+        width: 28px;
+        height: 16px;
+        transform: translateX(-50%);
+      }
+
+      .boss-mini i.crown {
+        background: #ffd60a;
+        clip-path: polygon(0 100%, 16% 35%, 34% 100%, 50% 18%, 66% 100%, 84% 35%, 100% 100%);
+      }
+
+      .boss-mini i.cap {
+        top: -9px;
+        width: 30px;
+        height: 15px;
+        border-radius: 14px 14px 6px 6px;
+        background: #c7d2fe;
+        transform: translateX(-50%) rotate(-12deg);
+      }
+
+      .boss-mini i.dorm {
+        top: -8px;
+        width: 24px;
+        height: 14px;
+        border-radius: 6px 6px 3px 3px;
+        background: #25314a;
+      }
+
+      .boss-mini::before,
+      .boss-mini::after {
+        content: "";
+        position: absolute;
+        top: 15px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.92);
+      }
+
+      .boss-mini::before {
+        left: 12px;
+      }
+
+      .boss-mini::after {
+        right: 12px;
+      }
+
+      .boss-card b {
+        font-size: 12px;
+        line-height: 1.15;
+      }
+
+      .boss-card small {
+        color: var(--muted);
+        font-size: 10px;
+      }
+
+      .raid-chip {
+        flex: 0 0 auto;
+        border-radius: 999px;
+        padding: 7px 10px;
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .raid-preview {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 10px;
+        align-items: stretch;
+      }
+
+      .mini-map {
+        min-height: 112px;
+        border-radius: 18px;
+        position: relative;
+        overflow: hidden;
+        background-size: cover;
+        background-position: center;
+        background-color: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+      }
+
+      .mini-map::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(circle at 50% 50%, rgba(0, 245, 255, 0.08), transparent 42%),
+          linear-gradient(180deg, rgba(12, 20, 34, 0.1), rgba(12, 20, 34, 0.34));
+        pointer-events: none;
+      }
+
+      .mini-map-dot,
+      .campus-point {
+        position: absolute;
+        left: var(--x);
+        top: var(--y);
+        transform: translate(-50%, -50%);
+        display: grid;
+        place-items: center;
+      }
+
+      .mini-map-dot {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--dot);
+        color: #171a20;
+        font-size: 12px;
+        font-weight: 1000;
+        z-index: 2;
+        box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.12);
+      }
+
+      .mini-map-dot.active {
+        z-index: 4;
+        box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.18), 0 10px 22px rgba(0, 0, 0, 0.28);
+      }
+
+      .boss-preview {
+        min-height: 112px;
+        display: grid;
+        gap: 8px;
+        align-content: center;
+        padding: 12px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+      }
+
+      .boss-preview.codex-link {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: center;
+        align-content: center;
+        gap: 2px;
+        color: #fff;
+        min-height: 112px;
+        padding: 10px 8px;
+      }
+
+      .boss-preview.codex-link b {
+        grid-column: 1 / -1;
+        margin-top: 4px;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: 12px;
+        line-height: 1.2;
+        text-align: center;
+      }
+
+      .mini-map:hover,
+      .boss-preview.codex-link:hover {
+        border-color: rgba(255, 255, 255, 0.34);
+      }
+
+      .boss-preview.codex-link:active {
+        transform: scale(0.98);
+      }
+
+      .boss-avatar {
+        width: 44px;
+        height: 38px;
+        margin: 0 auto;
+        border-radius: var(--shape, 18px 18px 14px 14px);
+        position: relative;
+        background: linear-gradient(135deg, var(--boss-a, #5e5ce6), var(--boss-b, #bf5af2));
+        box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.14);
+      }
+
+      .boss-avatar::before,
+      .boss-avatar::after {
+        content: "";
+        position: absolute;
+        top: 13px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #fff;
+      }
+
+      .boss-avatar::before {
+        left: 12px;
+      }
+
+      .boss-avatar::after {
+        right: 12px;
+      }
+
+      .boss-health {
+        display: grid;
+        gap: 5px;
+      }
+
+      .boss-health-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        color: rgba(255, 255, 255, 0.76);
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .boss-bar {
+        height: 9px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .boss-bar span {
+        display: block;
+        width: var(--value);
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #ff375f, #ff9f0a);
+        transition: width 0.35s ease;
+      }
+
+      .campus-map {
+        min-height: 288px;
+        border-radius: 24px;
+        position: relative;
+        overflow: hidden;
+        background-size: cover;
+        background-position: center;
+        background-color: #172236;
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      #raid-map,
+      #boss-codex,
+      #raid-battle {
+        scroll-margin-top: 16px;
+      }
+
+      .campus-map::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(180deg, rgba(8, 13, 24, 0.08), rgba(8, 13, 24, 0.28)),
+          radial-gradient(circle at 50% 55%, transparent 0 38%, rgba(8, 13, 24, 0.22) 70%);
+        pointer-events: none;
+      }
+
+      .map-control-row {
+        position: absolute;
+        z-index: 4;
+        left: 12px;
+        right: 12px;
+        top: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .map-badge {
+        min-height: 30px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0 11px;
+        border-radius: 999px;
+        background: rgba(255, 253, 248, 0.9);
+        color: #171a20;
+        font-size: 11px;
+        font-weight: 1000;
+      }
+
+      .map-toggle {
+        display: inline-flex;
+        gap: 3px;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgba(12, 20, 34, 0.64);
+        backdrop-filter: blur(12px);
+      }
+
+      .map-toggle button {
+        min-height: 26px;
+        padding: 0 9px;
+        border-radius: 999px;
+        background: transparent;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .map-toggle button.active {
+        background: rgba(255, 255, 255, 0.92);
+        color: #171a20;
+      }
+
+      .route-planner {
+        display: grid;
+        gap: 7px;
+        margin: -4px 2px 0;
+      }
+
+      .route-plan-btn {
+        min-height: 40px;
+        border-radius: 14px;
+        padding: 0 14px;
+        background: var(--ink);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 900;
+        text-align: center;
+      }
+
+      .route-planner .tiny {
+        margin: 0;
+        line-height: 1.5;
+      }
+
+      .campus-point {
+        z-index: 2;
+        width: 64px;
+        min-height: 62px;
+        gap: 5px;
+        padding: 7px 6px;
+        border-radius: 18px;
+        background: rgba(255, 253, 248, 0.9);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 12px 24px rgba(12, 20, 34, 0.18);
+      }
+
+      .campus-point.active {
+        z-index: 6;
+        background: #171a20;
+        color: #fff;
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.18), 0 16px 32px rgba(12, 20, 34, 0.28);
+      }
+
+      .point-token {
+        width: 28px;
+        height: 28px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: var(--dot);
+        color: #171a20;
+        font-size: 14px;
+        font-weight: 1000;
+      }
+
+      .campus-point b {
+        max-width: 100%;
+        font-size: 11px;
+        line-height: 1.12;
+      }
+
+      .campus-point small {
+        color: var(--muted);
+        font-size: 9px;
+        line-height: 1.1;
+      }
+
+      .campus-point.active small {
+        color: rgba(255, 255, 255, 0.68);
+      }
+
+      .battle-stage {
+        display: grid;
+        gap: 14px;
+        padding: 16px;
+        border-radius: 24px;
+        color: #fff;
+        background:
+          radial-gradient(circle at 20% 82%, rgba(0, 245, 255, 0.12), transparent 26%),
+          linear-gradient(135deg, #171a20, #23354a);
+      }
+
+      .home-battle {
+        margin-top: -2px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 16px 34px rgba(31, 42, 55, 0.14);
+      }
+
+      .home-battle .battle-field {
+        min-height: 112px;
+      }
+
+      .battle-field {
+        min-height: 132px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: end;
+        gap: 18px;
+      }
+
+      .squad,
+      .boss-side {
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 7px;
+      }
+
+      .fighter {
+        width: 28px;
+        height: 46px;
+        border-radius: 14px 14px 9px 9px;
+        position: relative;
+        background: var(--color);
+      }
+
+      .fighter::before {
+        content: "";
+        position: absolute;
+        left: 6px;
+        top: -12px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #f3c29a;
+      }
+
+      .fighter.crown::after {
+        content: "";
+        position: absolute;
+        left: 5px;
+        top: -23px;
+        width: 18px;
+        height: 12px;
+        background: #ffd60a;
+        clip-path: polygon(0 100%, 16% 35%, 34% 100%, 50% 18%, 66% 100%, 84% 35%, 100% 100%);
+      }
+
+      .boss-figure {
+        width: 76px;
+        height: 82px;
+        border-radius: var(--shape, 26px 26px 18px 18px);
+        position: relative;
+        background: linear-gradient(135deg, var(--boss-a, #5e5ce6), var(--boss-b, #bf5af2));
+        box-shadow: inset 0 -16px 0 rgba(0, 0, 0, 0.16);
+      }
+
+      .boss-figure::before {
+        content: "";
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        top: -14px;
+        height: 20px;
+        border-radius: 9px 9px 4px 4px;
+        background: #ffd60a;
+        clip-path: polygon(0 100%, 18% 36%, 35% 100%, 50% 15%, 65% 100%, 82% 36%, 100% 100%);
+      }
+
+      .boss-figure::after {
+        content: "";
+        position: absolute;
+        left: 19px;
+        right: 19px;
+        top: 32px;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.88);
+      }
+
+      .tool-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .inventory-panel {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.09);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .inventory-panel .tiny {
+        color: rgba(255, 255, 255, 0.68);
+      }
+
+      .tool-card {
+        min-height: 66px;
+        display: grid;
+        align-content: center;
+        gap: 4px;
+        padding: 9px;
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        text-align: center;
+        color: #fff;
+      }
+
+      .tool-card.empty {
+        opacity: 0.56;
+      }
+
+      .tool-card:active {
+        transform: scale(0.98);
+      }
+
+      .tool-card b {
+        font-size: 13px;
+      }
+
+      .tool-card span {
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 11px;
+      }
+
+      .tool-card small {
+        color: rgba(255, 255, 255, 0.54);
+        font-size: 10px;
+        line-height: 1.25;
+      }
+
+      .recommend-reason {
+        display: none;
+      }
+
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin: 14px 0;
+      }
+
+      .meta {
+        min-height: 66px;
+        border-radius: 14px;
+        padding: 9px;
+        display: grid;
+        align-content: center;
+        gap: 4px;
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .meta b,
+      .stat b {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .meta span,
+      .stat span,
+      .tiny {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .home-hero .meta span {
+        color: rgba(255, 255, 255, 0.78);
+      }
+
+      .activity-card {
+        background: #16191f;
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.06);
+        cursor: pointer;
+      }
+
+      .activity-layout {
+        display: grid;
+        grid-template-columns: 132px 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .activity-card .switch-row {
+        margin-bottom: 12px;
+      }
+
+      .activity-rings,
+      .timer-ring {
+        position: relative;
+        width: 132px;
+        aspect-ratio: 1;
+        flex: 0 0 auto;
+      }
+
+      .ring-layer {
+        position: absolute;
+        border-radius: 50%;
+        background: conic-gradient(var(--ring-color) var(--ring-angle), rgba(255, 255, 255, 0.13) 0);
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring-size)), #000 calc(100% - var(--ring-size) + 1px));
+        mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring-size)), #000 calc(100% - var(--ring-size) + 1px));
+      }
+
+      .ring-layer.move {
+        inset: 0;
+        --ring-color: #ff375f;
+        --ring-angle: var(--move-angle);
+        --ring-size: 13px;
+      }
+
+      .ring-layer.exercise {
+        inset: 19px;
+        --ring-color: #9dff00;
+        --ring-angle: var(--exercise-angle);
+        --ring-size: 13px;
+      }
+
+      .ring-layer.stand {
+        inset: 38px;
+        --ring-color: #00f5ff;
+        --ring-angle: var(--stand-angle);
+        --ring-size: 13px;
+      }
+
+      .rings-center {
+        position: absolute;
+        inset: 57px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .rings-legend {
+        display: grid;
+        gap: 8px;
+      }
+
+      .ring-detail {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: grid;
+        gap: 9px;
+      }
+
+      .ring-detail-row {
+        display: grid;
+        grid-template-columns: 74px 1fr auto;
+        gap: 8px;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 12px;
+      }
+
+      .mini-progress {
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+      }
+
+      .mini-progress span {
+        display: block;
+        width: var(--value);
+        height: 100%;
+        border-radius: inherit;
+        background: var(--color);
+      }
+
+      .legend-item {
+        display: grid;
+        grid-template-columns: 10px 1fr auto;
+        gap: 8px;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.72);
+        font-size: 12px;
+      }
+
+      .legend-item i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--dot);
+      }
+
+      .legend-item b {
+        color: #fff;
+        font-size: 13px;
+      }
+
+      .task-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 7px;
+      }
+
+      .task-tags span {
+        border-radius: 999px;
+        padding: 4px 8px;
+        background: rgba(32, 35, 42, 0.06);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .task-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .task-item {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        align-items: center;
+        gap: 11px;
+        padding: 12px;
+        border-radius: 15px;
+        background: rgba(238, 247, 241, 0.78);
+        border: 1px solid rgba(20, 122, 100, 0.1);
+        color: var(--ink);
+        text-align: left;
+      }
+
+      .task-item.alt {
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        background: var(--green);
+        color: #fff;
+        flex: 0 0 auto;
+      }
+
+      .icon.coral {
+        background: var(--coral);
+      }
+
+      .icon.amber {
+        background: var(--amber);
+        color: var(--ink);
+      }
+
+      .icon.teal {
+        background: var(--teal);
+      }
+
+      .task-item h3,
+      .leader h3,
+      .reward h3 {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.35;
+      }
+
+      .task-item p,
+      .leader p,
+      .reward p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+      }
+
+      .stat {
+        min-height: 78px;
+        border-radius: 16px;
+        padding: 12px 10px;
+        display: grid;
+        align-content: center;
+        gap: 6px;
+        background: rgba(255, 253, 248, 0.75);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .timer-box {
+        display: grid;
+        justify-items: center;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 14px 16px;
+        background: #171a20;
+        color: #fff;
+      }
+
+      .timer-ring {
+        width: min(58vw, 226px);
+      }
+
+      .timer-box .phase-strip {
+        display: flex;
+        flex-wrap: nowrap;
+        align-self: stretch;
+        width: 100%;
+        gap: 7px;
+      }
+
+      .timer-box .phase-chip {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+
+      .timer-inner {
+        position: absolute;
+        inset: 31%;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        align-content: center;
+        background: #171a20;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .timer-inner strong {
+        font-size: clamp(24px, 8vw, 34px);
+        line-height: 1;
+        letter-spacing: 0;
+      }
+
+      .timer-inner .tiny,
+      .timer-box .tiny {
+        color: rgba(255, 255, 255, 0.68);
+      }
+
+      .timer-progress {
+        width: 100%;
+        display: grid;
+        gap: 7px;
+      }
+
+      .timer-progress-label {
+        display: flex;
+        justify-content: space-between;
+        color: rgba(255, 255, 255, 0.68);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .timer-progress-track {
+        height: 8px;
+        border-radius: 999px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.11);
+      }
+
+      .timer-progress-track span {
+        display: block;
+        width: var(--value);
+        height: 100%;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #00f5ff, #9dff00, #ff9f0a);
+        transition: width 0.35s ease;
+      }
+
+      .metric-caption {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        color: rgba(255, 255, 255, 0.66);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .live-metrics {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        justify-self: stretch;
+      }
+
+      .live-metric {
+        min-height: 58px;
+        border-radius: 14px;
+        padding: 9px;
+        background: rgba(255, 255, 255, 0.08);
+        display: grid;
+        align-content: center;
+        gap: 4px;
+      }
+
+      .live-metric b {
+        font-size: 16px;
+      }
+
+      .verify-panel {
+        background: #fff7e8;
+        border-color: rgba(242, 184, 75, 0.34);
+      }
+
+      .source-grid {
+        display: grid;
+        gap: 9px;
+      }
+
+      .source-card {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 42px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 11px;
+        border-radius: 15px;
+        background: rgba(255, 253, 248, 0.78);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+        color: var(--ink);
+        text-align: left;
+      }
+
+      .source-card h3 {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      .source-card p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.35;
+      }
+
+      .number-row {
+        display: grid;
+        grid-template-columns: 48px 1fr 48px;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .number-display {
+        min-height: 48px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 253, 248, 0.8);
+        border: 1px solid rgba(32, 35, 42, 0.1);
+        font-weight: 900;
+      }
+
+      .result-burst {
+        display: grid;
+        gap: 16px;
+        text-align: center;
+        padding-top: 26px;
+      }
+
+      .medal {
+        width: 116px;
+        height: 116px;
+        margin: 0 auto;
+        border-radius: 35px;
+        display: grid;
+        place-items: center;
+        background:
+          linear-gradient(135deg, rgba(242, 184, 75, 0.95), rgba(231, 95, 72, 0.88)),
+          var(--amber);
+        color: #fff;
+        box-shadow: var(--shadow);
+      }
+
+      .medal svg {
+        width: 54px;
+        height: 54px;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+
+      .result-burst h1 {
+        margin: 0;
+        font-size: 34px;
+      }
+
+      .team-meter {
+        display: grid;
+        gap: 10px;
+      }
+
+      .team-head {
+        min-height: 164px;
+        border-radius: 24px;
+        padding: 18px;
+        background:
+          linear-gradient(135deg, rgba(238, 247, 241, 0.92), rgba(255, 253, 248, 0.92)),
+          url("data:image/svg+xml,%3Csvg width='160' height='120' viewBox='0 0 160 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23147a64' stroke-opacity='0.18' stroke-width='6'%3E%3Cpath d='M12 100c30-60 56-74 84-42 15 17 31 19 52 6'/%3E%3Cpath d='M18 70c26-32 46-39 68-20 18 16 35 14 54-6'/%3E%3C/g%3E%3C/svg%3E") right bottom / 170px auto no-repeat;
+        border: 1px solid rgba(32, 35, 42, 0.09);
+      }
+
+      .team-head h2 {
+        margin: 6px 0 8px;
+        font-size: 25px;
+      }
+
+      .leader-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .leader {
+        display: grid;
+        grid-template-columns: 34px 42px 1fr;
+        align-items: center;
+        gap: 10px;
+        padding: 11px;
+        border-radius: 16px;
+        background: rgba(255, 253, 248, 0.82);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .leader-metrics {
+        grid-column: 3 / 4;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+        margin-top: 7px;
+      }
+
+      .leader-metrics span {
+        border-radius: 10px;
+        background: rgba(32, 35, 42, 0.06);
+        padding: 5px 6px;
+        color: var(--ink);
+        font-size: 11px;
+        font-weight: 800;
+        text-align: center;
+      }
+
+      .privacy-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        padding: 5px;
+        border-radius: 15px;
+        background: rgba(32, 35, 42, 0.06);
+      }
+
+      .privacy-tabs button {
+        min-height: 34px;
+        border-radius: 11px;
+        background: transparent;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .privacy-tabs button.active {
+        background: var(--ink);
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(32, 35, 42, 0.16);
+      }
+
+      .privacy-trigger {
+        min-width: 58px;
+        padding-inline: 12px;
+      }
+
+      .privacy-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: grid;
+        place-items: end center;
+        padding: 18px;
+        background: rgba(22, 25, 31, 0.36);
+        backdrop-filter: blur(7px);
+      }
+
+      .privacy-sheet {
+        width: min(100%, 420px);
+        border-radius: 24px;
+        padding: 16px;
+        background: rgba(255, 253, 248, 0.98);
+        box-shadow: 0 24px 60px rgba(32, 35, 42, 0.22);
+        display: grid;
+        gap: 14px;
+      }
+
+      .privacy-sheet h3 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .privacy-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .privacy-options {
+        display: grid;
+        gap: 10px;
+      }
+
+      .privacy-option {
+        display: grid;
+        gap: 4px;
+        text-align: left;
+        padding: 13px 14px;
+        border-radius: 16px;
+        background: rgba(32, 35, 42, 0.04);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .privacy-option.active {
+        background: rgba(20, 122, 100, 0.1);
+        border-color: rgba(20, 122, 100, 0.24);
+      }
+
+      .privacy-option b {
+        font-size: 14px;
+      }
+
+      .privacy-option p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .rank {
+        width: 30px;
+        height: 30px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: rgba(32, 35, 42, 0.08);
+        font-weight: 900;
+        font-size: 13px;
+      }
+
+      .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        background: var(--surface-2);
+        color: var(--green);
+        font-weight: 900;
+      }
+
+      .avatar.me {
+        background: var(--ink);
+        color: #fff;
+      }
+
+      .week-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 7px;
+      }
+
+      .day {
+        min-height: 48px;
+        border-radius: 13px;
+        display: grid;
+        place-items: center;
+        gap: 2px;
+        background: rgba(255, 253, 248, 0.78);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .day.done {
+        background: var(--green);
+        color: #fff;
+        border-color: var(--green);
+      }
+
+      .day.missed {
+        background: rgba(231, 95, 72, 0.1);
+        color: var(--coral);
+        border-color: rgba(231, 95, 72, 0.24);
+      }
+
+      .day.future {
+        background: rgba(32, 35, 42, 0.04);
+        color: #8b94a1;
+      }
+
+      .day.active {
+        outline: 3px solid rgba(231, 95, 72, 0.26);
+        border-color: var(--coral);
+      }
+
+      .day-detail {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        gap: 11px;
+        align-items: center;
+        border-radius: 16px;
+        background: rgba(255, 253, 248, 0.8);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+        padding: 12px;
+      }
+
+      .badge-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+      }
+
+      .badge {
+        width: 100%;
+        min-height: 116px;
+        border-radius: 16px;
+        padding: 12px 8px;
+        text-align: center;
+        display: grid;
+        align-content: center;
+        gap: 8px;
+        background: rgba(255, 253, 248, 0.8);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+        color: var(--ink);
+      }
+
+      .badge .badge-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        margin: 0 auto;
+        color: #fff;
+        background:
+          radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.58), transparent 24%),
+          linear-gradient(135deg, var(--badge-a), var(--badge-b));
+        box-shadow: inset 0 -10px 18px rgba(32, 35, 42, 0.18), 0 12px 20px rgba(32, 35, 42, 0.1);
+      }
+
+      .badge.locked {
+        opacity: 0.48;
+      }
+
+      .badge b {
+        font-size: 13px;
+      }
+
+      .badge p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
+      .profile-head {
+        display: grid;
+        grid-template-columns: 64px 1fr;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .profile-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 22px;
+        display: grid;
+        place-items: center;
+        color: #fff;
+        font-size: 26px;
+        font-weight: 1000;
+        background:
+          radial-gradient(circle at 32% 25%, rgba(255, 255, 255, 0.6), transparent 22%),
+          linear-gradient(135deg, #ff6a3d, #198274);
+        box-shadow: var(--shadow);
+      }
+
+      .reward-list {
+        display: grid;
+        gap: 9px;
+      }
+
+      .reward {
+        display: grid;
+        grid-template-columns: 44px 1fr auto;
+        gap: 11px;
+        align-items: center;
+        padding: 12px;
+        border-radius: 16px;
+        background: rgba(255, 253, 248, 0.8);
+        border: 1px solid rgba(32, 35, 42, 0.08);
+      }
+
+      .switch-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .switch {
+        width: 48px;
+        height: 28px;
+        border-radius: 999px;
+        background: var(--green);
+        padding: 4px;
+        transition: 0.2s ease;
+      }
+
+      .switch span {
+        display: block;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        margin-left: 20px;
+      }
+
+      .switch.off {
+        background: rgba(32, 35, 42, 0.18);
+      }
+
+      .switch.off span {
+        margin-left: 0;
+      }
+
+      .bottom-nav {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        width: min(100%, 460px);
+        transform: translateX(-50%);
+        display: block;
+        gap: 8px;
+        padding: 10px 14px 14px;
+        background: rgba(246, 242, 234, 0.86);
+        backdrop-filter: blur(18px);
+        border-top: 1px solid rgba(32, 35, 42, 0.08);
+        --nav-index: 0;
+      }
+
+      .bottom-nav::before {
+        content: "";
+        position: absolute;
+        left: 14px;
+        top: 10px;
+        width: calc((100% - 28px - 16px) / 3);
+        height: 52px;
+        border-radius: 18px;
+        background: var(--ink);
+        transform: translateX(calc(var(--nav-index) * (100% + 8px)));
+        transition:
+          transform 0.34s cubic-bezier(0.2, 0.8, 0.2, 1),
+          width 0.34s cubic-bezier(0.2, 0.8, 0.2, 1);
+        box-shadow: 0 14px 26px rgba(32, 35, 42, 0.18);
+      }
+
+      .nav-inner {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .nav-btn {
+        min-height: 52px;
+        border-radius: 16px;
+        display: grid;
+        place-items: center;
+        gap: 4px;
+        color: var(--muted);
+        background: transparent;
+        font-size: 11px;
+        font-weight: 800;
+        transition: color 0.22s ease, transform 0.22s ease;
+      }
+
+      .nav-btn svg {
+        width: 21px;
+        height: 21px;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+
+      .nav-btn.active {
+        color: #fff;
+        transform: translateY(-1px) scale(1.01);
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 82px;
+        transform: translateX(-50%) translateY(16px);
+        width: min(calc(100% - 36px), 420px);
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: var(--ink);
+        color: #fff;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.22s ease;
+        font-size: 14px;
+        line-height: 1.45;
+        box-shadow: var(--shadow);
+        z-index: 20;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      @media (min-width: 760px) {
+        body {
+          padding: 24px 0;
+        }
+
+        .app {
+          min-height: calc(100vh - 48px);
+          border-radius: 34px;
+        }
+
+        .screen {
+          min-height: calc(100vh - 48px);
+        }
+
+        .hero {
+          min-height: calc(100vh - 88px);
+        }
+
+        .bottom-nav {
+          bottom: 24px;
+          border-radius: 0 0 34px 34px;
+        }
+      }
+
+      @media (max-width: 380px) {
+        .screen {
+          padding-inline: 14px;
+        }
+
+        .activity-layout {
+          grid-template-columns: 112px 1fr;
+          gap: 12px;
+        }
+
+        .activity-rings {
+          width: 112px;
+        }
+
+        .campus-point {
+          width: 58px;
+          min-height: 58px;
+          border-radius: 16px;
+          padding: 6px 5px;
+        }
+
+        .point-token {
+          width: 24px;
+          height: 24px;
+          border-radius: 9px;
+          font-size: 12px;
+        }
+
+        .badge-grid,
+        .stat-grid,
+        .meta-grid {
+          gap: 7px;
+        }
+
+        .badge {
+          min-height: 108px;
+          padding-inline: 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app" id="app"></main>
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const STORAGE_KEY = "dongliangshe-demo-v10";
+      const MAP_IMAGES = {
+        lake: "./用户附件2.png",
+        campus: "./用户附件.png"
+      };
+
+      const icons = {
+        app: '<span class="app-monster" aria-hidden="true"></span>',
+        bolt: '<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"/></svg>',
+        foot: '<svg viewBox="0 0 24 24"><path d="M8 18c-1.5 0-3 1-3 2.5S6.3 23 8.2 23c2.4 0 4.8-1.8 4.8-4.2 0-1.7-1.1-2.8-2.6-2.8H8Z"/><path d="M13.5 6c.8-2.5 2.8-4.2 5-3.6 2 .6 2.8 2.8 2 4.8-.9 2.6-3 4.5-5.1 6.2-1.9 1.5-4.4.5-4.1-1.9.2-1.9 1.4-3.6 2.2-5.5Z"/></svg>',
+        flame: '<svg viewBox="0 0 24 24"><path d="M8.5 14.5c0 2.3 1.6 4 3.7 4 2.4 0 4-1.7 4-4.1 0-1.7-.8-2.8-2-4.2-.7 1.6-1.7 2.5-3 2.5.5-3.1-.7-5.4-3.2-7.2.4 3.4-3.2 4.9-3.2 8.7 0 4.2 3.1 7.3 7.4 7.3s7.4-3.1 7.4-7.3c0-4.8-3.2-7.2-5-11.7"/></svg>',
+        users: '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.2a4 4 0 0 1 0 7.6"/></svg>',
+        trophy: '<svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h3a2 2 0 0 1-2 4h-1"/><path d="M7 5H4a2 2 0 0 0 2 4h1"/></svg>',
+        home: '<svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>',
+        chart: '<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-7"/></svg>',
+        user: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+        play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7Z"/></svg>',
+        plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
+        minus: '<svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>',
+        check: '<svg viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"/></svg>',
+        rotate: '<svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>',
+        gift: '<svg viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5A2.5 2.5 0 1 1 12 4.5V7Z"/><path d="M12 7h4.5A2.5 2.5 0 1 0 12 4.5V7Z"/></svg>',
+        shield: '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-5"/></svg>'
+      };
+
+      const seedState = () => ({
+        route: "welcome",
+        selectedTaskId: "t1",
+        selectedDay: 5,
+        ringsExpanded: false,
+        privacySheetOpen: false,
+        privacyMode: "balanced",
+        raidMapMode: "campus",
+        raidPointId: "p1",
+        bossId: "b1",
+        pendingRaidPointId: null,
+        activeRaidTraining: null,
+        raidResolved: false,
+        timerSeconds: 0,
+        checkinSnapshot: null,
+        manualMinutes: 24,
+        recommendationsOn: true,
+        onboarding: {
+          goal: "坚持运动",
+          level: "零基础",
+          sport: "快走",
+          time: "晚饭后"
+        },
+        user: {
+          id: "u0",
+          nickname: "Jupiter",
+          level: 3,
+          xp: 260,
+          points: 86,
+          streak: 3,
+          teamId: "team-1"
+        },
+        tasks: [
+          {
+            id: "t1",
+            title: "饭后间歇快走训练",
+            subtitle: "热身 3 分 · 快走间歇 16 分 · 核心激活 3 分 · 放松 2 分",
+            phases: [
+              { label: "热身", minutes: 3 },
+              { label: "主段", minutes: 16 },
+              { label: "核心", minutes: 3 },
+              { label: "放松", minutes: 2 }
+            ],
+            type: "快走",
+            duration: 24,
+            difficulty: "中等强度",
+            rewardXp: 58,
+            rewardPoints: 14,
+            scene: "闵行校区思源湖 / 操场外圈",
+            calories: 132,
+            exerciseMinutes: 24,
+            standHours: 1,
+            distance: 2.1,
+            steps: 3100,
+            reason: "基于 Jupiter 的晚饭后空档、零基础起点和想提升坚持频率生成"
+          },
+          {
+            id: "t2",
+            title: "宿舍激活小循环",
+            subtitle: "动态拉伸 + 深蹲 + 平板支撑",
+            phases: [
+              { label: "激活", minutes: 4 },
+              { label: "循环", minutes: 6 },
+              { label: "拉伸", minutes: 4 }
+            ],
+            type: "室内",
+            duration: 14,
+            difficulty: "无器械",
+            rewardXp: 36,
+            rewardPoints: 8,
+            scene: "宿舍 / 雨天",
+            calories: 62,
+            exerciseMinutes: 14,
+            standHours: 1,
+            distance: 0,
+            steps: 650,
+            reason: "适合雨天、考试周、无法去操场的替代任务"
+          },
+          {
+            id: "t3",
+            title: "体测心肺唤醒",
+            subtitle: "快走 6 分 + 慢跑 6 分 + 拉伸 4 分",
+            phases: [
+              { label: "热身", minutes: 4 },
+              { label: "心肺", minutes: 8 },
+              { label: "拉伸", minutes: 4 }
+            ],
+            type: "跑走",
+            duration: 16,
+            difficulty: "渐进",
+            rewardXp: 48,
+            rewardPoints: 12,
+            scene: "闵行校区东区操场",
+            calories: 104,
+            exerciseMinutes: 16,
+            standHours: 1,
+            distance: 1.7,
+            steps: 2200,
+            reason: "适合体测焦虑用户，训练强度比主线略高"
+          }
+        ],
+        checkins: [
+          { id: "c1", userId: "u1", taskId: "t1", duration: 16, distance: 1.6, createdAt: daysAgo(0) },
+          { id: "c2", userId: "u2", taskId: "t1", duration: 12, distance: 1.1, createdAt: daysAgo(0) },
+          { id: "c3", userId: "u0", taskId: "t2", duration: 8, distance: 0, createdAt: daysAgo(1) },
+          { id: "c4", userId: "u3", taskId: "t1", duration: 18, distance: 1.9, createdAt: daysAgo(1) },
+          { id: "c5", userId: "u4", taskId: "t2", duration: 9, distance: 0, createdAt: daysAgo(2) },
+          { id: "c6", userId: "u0", taskId: "t1", duration: 12, distance: 1.2, createdAt: daysAgo(2) },
+          { id: "c7", userId: "u1", taskId: "t2", duration: 10, distance: 0, createdAt: daysAgo(3) }
+        ],
+        team: {
+          id: "team-1",
+          name: "上海交大 D32-602 小队",
+          weeklyGoal: 20,
+          members: [
+            { id: "u0", name: "你", baseline: "零基础", contribution: 2, minutes: 20, distance: 1.2, avatar: "我" },
+            { id: "u1", name: "阿杰", baseline: "偶尔运动", contribution: 5, minutes: 62, distance: 4.9, avatar: "杰" },
+            { id: "u2", name: "小林", baseline: "零基础", contribution: 3, minutes: 34, distance: 2.4, avatar: "林" },
+            { id: "u3", name: "Momo", baseline: "体测焦虑", contribution: 4, minutes: 51, distance: 3.6, avatar: "Mo" },
+            { id: "u4", name: "一凡", baseline: "零基础", contribution: 1, minutes: 9, distance: 0, avatar: "凡" }
+          ]
+        },
+        raid: {
+          bossName: "懒懒怪",
+          weakness: "有氧",
+          targetHp: 500,
+          bosses: [
+            {
+              id: "b1",
+              name: "懒懒怪",
+              weakness: "有氧",
+              hp: 380,
+              maxHp: 500,
+              intro: "晚饭后最容易把人按回椅子上，绕湖快走、跑走交替能稳定削弱它。",
+              colorA: "#5e5ce6",
+              colorB: "#bf5af2",
+              shape: "24px 24px 18px 18px",
+              deco: "crown"
+            },
+            {
+              id: "b2",
+              name: "困困怪",
+              weakness: "节奏",
+              hp: 500,
+              maxHp: 500,
+              intro: "常在午后和晚课前出现，跳绳、跑走节奏和短间歇任务能打断它的睡意。",
+              colorA: "#00c7be",
+              colorB: "#2a8ca0",
+              shape: "26px 16px 26px 16px",
+              deco: "cap"
+            },
+            {
+              id: "b3",
+              name: "宅宅怪",
+              weakness: "力量",
+              hp: 260,
+              maxHp: 500,
+              intro: "考试周喜欢守住宿舍门口，深蹲、核心和无器械循环最适合破防。",
+              colorA: "#ff9f0a",
+              colorB: "#ff375f",
+              shape: "16px 28px 18px 28px",
+              deco: "dorm"
+            }
+          ],
+          inventory: [
+            { name: "疾步鞋", count: 2, type: "有氧", effect: "适合先手破弱点" },
+            { name: "节奏绳", count: 0, type: "节奏", effect: "可接在有氧后连击" },
+            { name: "力量星", count: 1, type: "力量", effect: "留给宿舍训练日" },
+            { name: "骑行补给", count: 0, type: "骑行", effect: "适合全图远征点" },
+            { name: "水花徽记", count: 0, type: "游泳", effect: "泳池任务掉落" },
+            { name: "绿意药水", count: 0, type: "恢复", effect: "低强度恢复日补位" }
+          ],
+          points: [
+            {
+              id: "p1",
+              name: "思源湖",
+              shortName: "湖",
+              task: "思源湖环线快走 24 分",
+              reward: "疾步鞋",
+              type: "有氧",
+              damage: 18,
+              travel: "步行",
+              scope: "lake",
+              x: "30%",
+              y: "66%",
+              position: {
+                lake: { x: "52%", y: "42%" },
+                campus: { x: "27%", y: "54%" }
+              },
+              color: "#9dff00",
+              note: "近景主线，适合绕湖快走或跑走"
+            },
+            {
+              id: "p2",
+              name: "光明体育场",
+              shortName: "跑",
+              task: "跑走交替 16 分",
+              reward: "疾步鞋",
+              type: "有氧",
+              damage: 16,
+              travel: "步行",
+              scope: "lake",
+              x: "70%",
+              y: "38%",
+              position: {
+                lake: { x: "23%", y: "60%" },
+                campus: { x: "8%", y: "68%" }
+              },
+              color: "#ff375f",
+              note: "近景副线，适合心肺唤醒"
+            },
+            {
+              id: "p3",
+              name: "D32 宿舍楼",
+              shortName: "D",
+              task: "深蹲核心 12 分",
+              reward: "力量星",
+              type: "力量",
+              damage: 10,
+              travel: "步行",
+              scope: "lake",
+              x: "24%",
+              y: "30%",
+              position: {
+                lake: { x: "48%", y: "89%" },
+                campus: { x: "42%", y: "78%" }
+              },
+              color: "#ffd60a",
+              note: "移到纪念品中心附近作为力量补位点，雨天或考试周可做"
+            },
+            {
+              id: "p9",
+              name: "包图台阶",
+              shortName: "阶",
+              task: "台阶节奏快走 10 分",
+              reward: "节奏绳",
+              type: "节奏",
+              damage: 14,
+              travel: "步行",
+              scope: "lake",
+              x: "63%",
+              y: "64%",
+              position: {
+                lake: { x: "78%", y: "60%" },
+                campus: { x: "-20%", y: "-20%" }
+              },
+              color: "#64d2ff",
+              note: "包玉刚图书馆西侧台阶附近，适合短节奏任务"
+            },
+            {
+              id: "p4",
+              name: "包玉刚图书馆",
+              shortName: "骑",
+              task: "骑行往返 18 分",
+              reward: "骑行补给",
+              type: "骑行",
+              damage: 22,
+              travel: "骑行",
+              scope: "campus",
+              x: "74%",
+              y: "24%",
+              position: {
+                campus: { x: "54%", y: "50%" }
+              },
+              color: "#00f5ff",
+              note: "远征任务，建议骑行往返"
+            },
+            {
+              id: "p6",
+              name: "船海学院",
+              shortName: "船",
+              task: "船海学院骑行 16 分",
+              reward: "骑行补给",
+              type: "骑行",
+              damage: 18,
+              travel: "骑行",
+              scope: "campus",
+              x: "86%",
+              y: "24%",
+              position: {
+                campus: { x: "86%", y: "24%" }
+              },
+              color: "#64d2ff",
+              note: "船舶海洋与建筑工程学院附近，适合东区同学顺路完成"
+            },
+            {
+              id: "p5",
+              name: "致远游泳馆",
+              shortName: "泳",
+              task: "泳池轻松游 20 分",
+              reward: "水花徽记",
+              type: "游泳",
+              damage: 20,
+              travel: "步行/骑行",
+              scope: "campus",
+              x: "84%",
+              y: "72%",
+              position: {
+                campus: { x: "18%", y: "33%" }
+              },
+              color: "#bf5af2",
+              note: "游泳任务，适合有场馆计划时完成"
+            },
+            {
+              id: "p7",
+              name: "东中院",
+              shortName: "东",
+              task: "东中院课后快走 12 分",
+              reward: "疾步鞋",
+              type: "有氧",
+              damage: 16,
+              travel: "步行",
+              scope: "campus",
+              x: "62%",
+              y: "62%",
+              position: {
+                campus: { x: "62%", y: "62%" }
+              },
+              color: "#ff9f0a",
+              note: "东中院附近低强度补给点，适合课后顺路完成"
+            },
+            {
+              id: "p8",
+              name: "植物园",
+              shortName: "植",
+              task: "植物园舒缓步行 14 分",
+              reward: "绿意药水",
+              type: "恢复",
+              damage: 12,
+              travel: "步行",
+              scope: "campus",
+              x: "44%",
+              y: "28%",
+              position: {
+                campus: { x: "44%", y: "28%" }
+              },
+              color: "#30d158",
+              note: "北侧舒缓点，适合恢复日或压力较大时完成"
+            },
+            {
+              id: "p10",
+              name: "凯旋门",
+              shortName: "凯",
+              task: "凯旋门放松骑行 15 分",
+              reward: "骑行补给",
+              type: "骑行",
+              damage: 16,
+              travel: "骑行",
+              scope: "campus",
+              x: "78%",
+              y: "84%",
+              position: {
+                campus: { x: "78%", y: "84%" }
+              },
+              color: "#ffcc00",
+              note: "右下区域远征点，适合顺路骑行或低强度恢复"
+            }
+          ]
+        }
+      });
+
+      let state = loadState();
+      let timerId = null;
+
+      function daysAgo(n) {
+        const d = new Date();
+        d.setDate(d.getDate() - n);
+        return d.toISOString();
+      }
+
+      function loadState() {
+        const initial = seedState();
+        const saved = safeStorageGet();
+        if (!saved) {
+          safeStorageSet(initial);
+          return initial;
+        }
+        try {
+          const parsed = JSON.parse(saved);
+          const merged = normalizeState({ ...initial, ...parsed });
+          safeStorageSet(merged);
+          return merged;
+        } catch {
+          safeStorageSet(initial);
+          return initial;
+        }
+      }
+
+      function mergeTaskDefaults(tasks, defaults) {
+        return defaults.map((defaultTask, index) => {
+          const savedTask = (tasks || []).find((task) => task.id === defaultTask.id) || (tasks || [])[index] || {};
+          return { ...defaultTask, ...savedTask, phases: savedTask.phases || defaultTask.phases };
+        });
+      }
+
+      function mergeRaidPointDefaults(points, defaults) {
+        return defaults.map((defaultPoint, index) => {
+          const savedPoint = (points || []).find((point) => point.id === defaultPoint.id) || (points || [])[index] || {};
+          return {
+            ...defaultPoint,
+            ...savedPoint,
+            position: { ...(defaultPoint.position || {}), ...(savedPoint.position || {}) }
+          };
+        });
+      }
+
+      function mergeInventoryDefaults(inventory, defaults) {
+        return defaults.map((defaultTool, index) => {
+          const savedTool = (inventory || []).find((tool) => tool.name === defaultTool.name) || (inventory || [])[index] || {};
+          return { ...defaultTool, ...savedTool, effect: savedTool.effect || defaultTool.effect };
+        });
+      }
+
+      function mergeBossDefaults(bosses, defaults) {
+        return defaults.map((defaultBoss, index) => {
+          const savedBoss = (bosses || []).find((boss) => boss.id === defaultBoss.id) || (bosses || [])[index] || {};
+          return {
+            ...defaultBoss,
+            ...savedBoss,
+            maxHp: defaultBoss.maxHp,
+            hp: Number.isFinite(savedBoss.hp) ? savedBoss.hp : defaultBoss.hp
+          };
+        });
+      }
+
+      function normalizeState(nextState) {
+        const defaults = seedState();
+        const bossId = nextState.bossId || defaults.bossId;
+        const boss = defaults.raid.bosses.find((item) => item.id === bossId) || defaults.raid.bosses[0];
+        return {
+          ...defaults,
+          ...nextState,
+          onboarding: { ...defaults.onboarding, ...(nextState.onboarding || {}) },
+          user: { ...defaults.user, ...(nextState.user || {}) },
+          team: {
+            ...defaults.team,
+            ...(nextState.team || {}),
+            name: "上海交大 D32-602 小队",
+            members: (nextState.team && nextState.team.members) || defaults.team.members
+          },
+          raid: {
+            ...defaults.raid,
+            ...(nextState.raid || {}),
+            bossName: boss.name,
+            weakness: boss.weakness,
+            targetHp: 500,
+            bosses: mergeBossDefaults(nextState.raid && nextState.raid.bosses, defaults.raid.bosses),
+            inventory: mergeInventoryDefaults(nextState.raid && nextState.raid.inventory, defaults.raid.inventory),
+            points: mergeRaidPointDefaults(nextState.raid && nextState.raid.points, defaults.raid.points)
+          },
+          bossId,
+          raidPointId: nextState.raidPointId || defaults.raidPointId,
+          pendingRaidPointId: nextState.pendingRaidPointId || null,
+          activeRaidTraining: nextState.activeRaidTraining || null,
+          raidResolved: Boolean(nextState.raidResolved),
+          tasks: mergeTaskDefaults(nextState.tasks, defaults.tasks),
+          route: nextState.route === "checkin" ? "home" : nextState.route || defaults.route,
+          privacySheetOpen: false,
+          checkinSnapshot: null,
+          timerSeconds: 0
+        };
+      }
+
+      function saveState() {
+        safeStorageSet(state);
+      }
+
+      function safeStorageGet() {
+        try {
+          return window.localStorage.getItem(STORAGE_KEY);
+        } catch {
+          return null;
+        }
+      }
+
+      function safeStorageSet(nextState) {
+        try {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+        } catch {
+          // file:// previews may block localStorage; the in-memory state still works.
+        }
+      }
+
+      function safeStorageRemove() {
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+        } catch {
+          // Ignore storage failures in direct file previews.
+        }
+      }
+
+      function setRoute(route) {
+        state.route = route;
+        if (route !== "checkin") stopTimer();
+        saveState();
+        render();
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(showToast.timeout);
+        showToast.timeout = setTimeout(() => toast.classList.remove("show"), 2200);
+      }
+
+      function selectedTask() {
+        return state.tasks.find((task) => task.id === state.selectedTaskId) || state.tasks[0];
+      }
+
+      function chooseTask(taskId) {
+        const task = state.tasks.find((item) => item.id === taskId) || state.tasks[0];
+        state.selectedTaskId = task.id;
+        state.manualMinutes = task.duration;
+        state.timerSeconds = 0;
+        state.checkinSnapshot = defaultCheckinSnapshot(task);
+        stopTimer();
+        saveState();
+        render();
+      }
+
+      function answer(key, value) {
+        state.onboarding[key] = value;
+        saveState();
+        render();
+      }
+
+      function toggleRings() {
+        state.ringsExpanded = !state.ringsExpanded;
+        saveState();
+        render();
+      }
+
+      function openPrivacyPanel() {
+        state.privacySheetOpen = true;
+        saveState();
+        render();
+      }
+
+      function closePrivacyPanel() {
+        state.privacySheetOpen = false;
+        saveState();
+        render();
+      }
+
+      function setPrivacyMode(mode) {
+        state.privacyMode = mode;
+        state.privacySheetOpen = false;
+        saveState();
+        render();
+      }
+
+      function showBadgeInfo(title, description) {
+        showToast(`${title}：${description}`);
+      }
+
+      function currentTeamProgress() {
+        return state.team.members.reduce((sum, member) => sum + member.contribution, 0);
+      }
+
+      function currentTeamMinutes() {
+        return state.team.members.reduce((sum, member) => sum + (member.minutes || 0), 0);
+      }
+
+      function currentTeamDistance() {
+        return Number(state.team.members.reduce((sum, member) => sum + (member.distance || 0), 0).toFixed(1));
+      }
+
+      function raidMapImage(mode = state.raidMapMode) {
+        return mode === "campus" ? MAP_IMAGES.campus : MAP_IMAGES.lake;
+      }
+
+      function raidMapLabel(mode = state.raidMapMode) {
+        return mode === "campus" ? "闵行校区全图" : "思源湖近景";
+      }
+
+      function visibleRaidPoints(mode = state.raidMapMode) {
+        return state.raid.points.filter((point) => {
+          if (mode !== "campus") return point.scope === "lake";
+          const pos = pointPosition(point, "campus");
+          return !(String(pos.x).startsWith("-") || String(pos.y).startsWith("-"));
+        });
+      }
+
+      function pointPosition(point, mode = state.raidMapMode) {
+        const position = point.position && point.position[mode];
+        return position || { x: point.x, y: point.y };
+      }
+
+      function selectedRaidPoint() {
+        return state.raid.points.find((point) => point.id === state.raidPointId) || state.raid.points[0];
+      }
+
+      function pendingRaidPoint() {
+        return state.raid.points.find((point) => point.id === state.pendingRaidPointId) || selectedRaidPoint();
+      }
+
+      function selectedBoss() {
+        const bosses = state.raid.bosses || [];
+        return bosses.find((boss) => boss.id === state.bossId) || bosses[0] || {
+          name: state.raid.bossName,
+          weakness: state.raid.weakness,
+          intro: "完成运动挑战获得道具，全宿舍一起推进 Boss 血量。",
+          colorA: "#5e5ce6",
+          colorB: "#bf5af2",
+          shape: "24px"
+        };
+      }
+
+      function selectBoss(bossId) {
+        const boss = (state.raid.bosses || []).find((item) => item.id === bossId);
+        if (!boss) return;
+        state.bossId = boss.id;
+        state.raid.bossName = boss.name;
+        state.raid.weakness = boss.weakness;
+        state.raidResolved = false;
+        saveState();
+        render();
+      }
+
+      function selectRaidPoint(pointId) {
+        const point = state.raid.points.find((item) => item.id === pointId);
+        if (!point) return;
+        state.raidPointId = point.id;
+        if (point.scope === "campus") state.raidMapMode = "campus";
+        state.raidResolved = false;
+        saveState();
+        render();
+      }
+
+      function openRaidSection(section = "map") {
+        state.route = "raid";
+        state.raidMapMode = "campus";
+        saveState();
+        render();
+        requestAnimationFrame(() => {
+          const targetId = section === "battle" ? "raid-battle" : section === "codex" ? "boss-codex" : "raid-map";
+          const target = document.getElementById(targetId);
+          target?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      }
+
+      function setRaidMapMode(mode) {
+        state.raidMapMode = mode === "campus" ? "campus" : "lake";
+        const points = visibleRaidPoints(state.raidMapMode);
+        if (!points.some((point) => point.id === state.raidPointId)) {
+          state.raidPointId = (points[0] || state.raid.points[0]).id;
+          state.raidResolved = false;
+        }
+        saveState();
+        render();
+      }
+
+      function bossDamageForType(type, baseDamage = 12) {
+        const boss = selectedBoss();
+        return baseDamage + (type === boss.weakness ? 10 : 0);
+      }
+
+      function sortedRaidPoints(points, activeId = state.raidPointId) {
+        return [...points].sort((a, b) => {
+          if (a.id === activeId) return 1;
+          if (b.id === activeId) return -1;
+          return 0;
+        });
+      }
+
+      function resolveRaidChallenge() {
+        const point = selectedRaidPoint();
+        state.raidResolved = true;
+        const tool = state.raid.inventory.find((item) => item.name === point.reward);
+        if (tool) tool.count += 1;
+        state.user.points += 6;
+        const me = state.team.members.find((member) => member.id === state.user.id);
+        if (me) me.contribution += 1;
+        saveState();
+        render();
+        showToast(`获得「${point.reward}」，可在道具仓点击使用`);
+      }
+
+      function useRaidTool(toolName) {
+        const tool = state.raid.inventory.find((item) => item.name === toolName);
+        const boss = selectedBoss();
+        if (!tool || tool.count <= 0) {
+          showToast("这个道具暂时没有库存");
+          return;
+        }
+        const damage = bossDamageForType(tool.type, 12);
+        tool.count -= 1;
+        boss.hp = Math.max(0, boss.hp - damage);
+        state.raid.bossName = boss.name;
+        state.raid.weakness = boss.weakness;
+        saveState();
+        render();
+        showToast(`${tool.name}${tool.type === boss.weakness ? "命中弱点" : "发动攻击"}，造成 ${damage} 点伤害`);
+      }
+
+      function previewRaidPoint(pointId) {
+        const point = state.raid.points.find((item) => item.id === pointId);
+        if (!point) return;
+        state.raidPointId = pointId;
+        saveState();
+        render();
+      }
+
+      function miniRaidMap() {
+        const mode = state.raidMapMode || "lake";
+        const points = sortedRaidPoints(visibleRaidPoints(mode));
+        return `
+          <div class="mini-map" style="background-image:url('${raidMapImage(mode)}')" role="button" tabindex="0" aria-label="打开副本校园地图" onclick="event.stopPropagation(); openRaidSection('map')" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); event.stopPropagation(); openRaidSection('map'); }">
+            ${points
+              .map((point) => {
+                const pos = pointPosition(point, mode);
+                return `
+                <span class="mini-map-dot ${point.id === state.raidPointId ? "active" : ""}" style="--x:${pos.x};--y:${pos.y};--dot:${point.color};">${point.shortName}</span>
+              `
+              })
+              .join("")}
+          </div>
+        `;
+      }
+
+      function raidBattlePanel({ compact = false } = {}) {
+        const point = selectedRaidPoint();
+        const boss = selectedBoss();
+        const hitWeakness = point.type === boss.weakness;
+        const previewTool = state.raid.inventory.find((tool) => tool.type === point.type && tool.count > 0) || state.raid.inventory.find((tool) => tool.count > 0) || state.raid.inventory[0];
+        const previewDamage = previewTool ? bossDamageForType(previewTool.type, 12) : bossDamageForType(point.type, point.damage);
+        const afterHp = Math.max(0, boss.hp - previewDamage);
+        const bossStyle = `--boss-a:${boss.colorA};--boss-b:${boss.colorB};--shape:${boss.shape};`;
+        const totalTools = state.raid.inventory.reduce((sum, tool) => sum + tool.count, 0);
+        return `
+          <div class="battle-stage ${compact ? "home-battle" : ""}" ${compact ? "" : 'id="raid-battle"'}>
+            <div class="switch-row">
+              <span>
+                <h2 class="section-title" style="color:#fff;">${boss.name}</h2>
+                <p class="tiny">今日弱点：${boss.weakness}。${hitWeakness ? `${point.name}挑战可触发暴击。` : `当前任务是${point.type}，可先攒道具或切到${boss.weakness}点。`}</p>
+              </span>
+              <span class="raid-chip">用道具 ${boss.hp} → ${afterHp}</span>
+            </div>
+            ${bossHealth()}
+            <div class="battle-field">
+              <div class="squad">
+                <span class="fighter crown" style="--color:#147a64"></span>
+                <span class="fighter" style="--color:#2a8ca0"></span>
+                <span class="fighter" style="--color:#f2b84b"></span>
+              </div>
+              <div class="boss-side">
+                <span class="boss-figure" style="${bossStyle}"></span>
+              </div>
+            </div>
+            <div class="inventory-panel">
+              <div class="switch-row">
+                <span>
+                  <b>当前道具仓</b>
+                  <p class="tiny">先由成员分头完成任务攒道具，再按 Boss 弱点组合出手。</p>
+                </span>
+                <span class="raid-chip">${totalTools} 件</span>
+              </div>
+              <div class="tool-row">
+                ${state.raid.inventory
+                  .map(
+                    (tool) => `
+                    <button class="tool-card ${tool.count <= 0 ? "empty" : ""}" onclick="useRaidTool('${tool.name}')">
+                      <b>${tool.name}</b>
+                      <span>${tool.type} · ${tool.count} 个</span>
+                      <small>${tool.effect || "可用于攻击 Boss"}</small>
+                    </button>
+                  `
+                  )
+                  .join("")}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function bossHealth(value = selectedBoss().hp) {
+        const boss = selectedBoss();
+        const maxHp = boss.maxHp || state.raid.targetHp || 500;
+        const pct = Math.max(0, Math.min(100, (value / maxHp) * 100));
+        return `
+          <div class="boss-health">
+            <div class="boss-health-row"><span>${boss.name}</span><b>${value} / ${maxHp}</b></div>
+            <div class="boss-bar" style="--value:${pct}%"><span></span></div>
+          </div>
+        `;
+      }
+
+      function heroBossShowcase() {
+        const bosses = (state.raid.bosses || []).slice(0, 3);
+        return `
+          <div class="hero-boss-stage">
+            ${bosses
+              .map((boss) => {
+                const pct = Math.max(0, Math.min(100, ((boss.hp || 0) / (boss.maxHp || 500)) * 100));
+                return `
+                  <div class="hero-boss">
+                    <span class="hero-boss-avatar" style="--boss-a:${boss.colorA};--boss-b:${boss.colorB};--shape:${boss.shape};"><i class="${boss.deco || "crown"}"></i></span>
+                    <b>${boss.name}</b>
+                    <span class="hero-boss-bar" aria-hidden="true" style="--value:${pct}%"><span></span></span>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+          <div class="hero-boss-copy">
+            <b>D32-602 小队</b>
+            <p class="sub">本周 Boss：${bosses.map((boss) => boss.name).join(" · ")}</p>
+          </div>
+        `;
+      }
+
+      function bossCodexPreview() {
+        const bosses = (state.raid.bosses || []).slice(0, 3);
+        return `
+          <span class="boss-preview codex-link" role="button" tabindex="0" aria-label="打开本周 Boss 图鉴" onclick="event.stopPropagation(); openRaidSection('codex')" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); event.stopPropagation(); openRaidSection('codex'); }">
+            ${bosses
+              .map(
+                (boss) => `
+                <span class="boss-avatar" style="--boss-a:${boss.colorA};--boss-b:${boss.colorB};--shape:${boss.shape};"></span>
+              `
+              )
+              .join("")}
+            <b>本周 Boss 图鉴</b>
+          </span>
+        `;
+      }
+
+      function ringAngles(task = selectedTask()) {
+        return {
+          move: `${Math.min(360, Math.round((task.calories / 160) * 360))}deg`,
+          exercise: `${Math.min(360, Math.round((task.exerciseMinutes / 30) * 360))}deg`,
+          stand: `${Math.min(360, Math.round((task.standHours / 8) * 360))}deg`
+        };
+      }
+
+      function activityRings(task = selectedTask(), size = "normal") {
+        const angles = ringAngles(task);
+        return `
+          <div class="activity-rings ${size}" style="--move-angle: ${angles.move}; --exercise-angle: ${angles.exercise}; --stand-angle: ${angles.stand};">
+            <span class="ring-layer move"></span>
+            <span class="ring-layer exercise"></span>
+            <span class="ring-layer stand"></span>
+            <span class="rings-center"></span>
+          </div>
+        `;
+      }
+
+      function ringsLegend(task = selectedTask()) {
+        return `
+          <div class="rings-legend">
+            <div class="legend-item"><i style="--dot:#ff375f"></i><span>活动能量</span><b>${task.calories} kcal</b></div>
+            <div class="legend-item"><i style="--dot:#9dff00"></i><span>运动时长</span><b>${task.exerciseMinutes} / 30 分</b></div>
+            <div class="legend-item"><i style="--dot:#00f5ff"></i><span>站立活跃</span><b>${task.standHours} / 8 小时</b></div>
+          </div>
+        `;
+      }
+
+      function ringDetail(task = selectedTask()) {
+        const rows = [
+          ["活动能量", task.calories, 180, "kcal", "#ff375f", "由训练强度和时长估算，授权后可用手机健康数据校验"],
+          ["运动时长", task.exerciseMinutes, 30, "分", "#9dff00", "以中等强度以上运动分钟计入"],
+          ["站立活跃", task.standHours, 8, "小时", "#00f5ff", "鼓励课间离座，避免整晚久坐"]
+        ];
+        return `
+          <div class="ring-detail">
+            ${rows
+              .map(
+                ([label, value, goal, unit, color, note]) => `
+                <div class="ring-detail-row">
+                  <span>${label}</span>
+                  <div class="mini-progress" style="--value:${Math.min(100, (value / goal) * 100)}%;--color:${color};"><span></span></div>
+                  <b>${value}/${goal}${unit}</b>
+                </div>
+                <p class="tiny">${note}</p>
+              `
+              )
+              .join("")}
+          </div>
+        `;
+      }
+
+      function leaderMetrics(member) {
+        const modes = {
+          minimal: [`${member.contribution} 次`],
+          balanced: [`${member.contribution} 次`, `${member.minutes || 0} 分`],
+          detailed: [`${member.contribution} 次`, `${member.minutes || 0} 分`, `${member.distance || 0} km`]
+        };
+        const values = modes[state.privacyMode] || modes.balanced;
+        return `
+          <div class="leader-metrics" style="grid-template-columns: repeat(${values.length}, minmax(0, 1fr));">
+            ${values.map((value) => `<span>${value}</span>`).join("")}
+          </div>
+        `;
+      }
+
+      function setSelectedDay(index) {
+        state.selectedDay = index;
+        saveState();
+        render();
+      }
+
+      function weeklyRecords() {
+        const records = [
+          { day: "一", status: "未完成", title: "错过计划", detail: "晚自习后没有运动，系统保留低压力补救建议", minutes: 0, distance: 0 },
+          { day: "二", status: "完成", title: "宿舍拉伸", detail: "8 分钟，完成新手稳定任务", minutes: 8, distance: 0 },
+          { day: "三", status: "完成", title: "校园快走", detail: "12 分钟，操场外圈 1.2 km", minutes: 12, distance: 1.2 },
+          { day: "四", status: "完成", title: "饭后间歇快走", detail: "24 分钟，思源湖外圈 2.1 km", minutes: 24, distance: 2.1 },
+          { day: "五", status: "完成", title: "室内核心", detail: "10 分钟，考试周低阻力任务", minutes: 10, distance: 0 },
+          { day: "六", status: "进行中", title: "今天计划", detail: "当前是周六，建议完成 D32 小队周挑战", minutes: 0, distance: 0 },
+          { day: "日", status: "未开始", title: "明日计划", detail: "周日任务会根据本周疲劳度自动降低强度", minutes: 0, distance: 0 }
+        ];
+        const todayRecord = state.checkins.find((item) => item.userId === state.user.id && isToday(item.createdAt));
+        if (todayRecord) {
+          records[5] = {
+            day: "六",
+            status: "完成",
+            title: "今日打卡",
+            detail: `${todayRecord.duration} 分钟，刚刚为小队贡献 1 次`,
+            minutes: todayRecord.duration,
+            distance: todayRecord.distance || 0
+          };
+        }
+        return records;
+      }
+
+      function isToday(iso) {
+        const d = new Date(iso);
+        const now = new Date();
+        return d.toDateString() === now.toDateString();
+      }
+
+      function completeCheckin() {
+        const task = selectedTask();
+        const hasTimer = state.timerSeconds > 0;
+        const minutes = hasTimer ? Math.max(1, Math.ceil(state.timerSeconds / 60)) : Math.max(1, state.manualMinutes || task.duration);
+        const me = state.team.members.find((member) => member.id === state.user.id);
+        const distance = task.distance ? Number(Math.min(task.distance, (minutes / task.duration) * task.distance).toFixed(1)) : 0;
+        state.checkins.push({
+          id: `c-${Date.now()}`,
+          userId: state.user.id,
+          taskId: task.id,
+          duration: minutes,
+          distance,
+          createdAt: new Date().toISOString()
+        });
+        state.user.xp += task.rewardXp;
+        state.user.points += task.rewardPoints;
+        state.user.streak += 1;
+        state.user.level = Math.max(1, Math.floor(state.user.xp / 120) + 1);
+        if (me) {
+          me.contribution += 1;
+          me.minutes += minutes;
+          me.distance = Number((me.distance + distance).toFixed(1));
+        }
+        state.timerSeconds = 0;
+        state.checkinSnapshot = null;
+        stopTimer();
+        state.route = "result";
+        saveState();
+        render();
+      }
+
+      function parseTimerLabel(label) {
+        const match = String(label || "").trim().match(/^(\d{2}):(\d{2})$/);
+        if (!match) return null;
+        return Number(match[1]) * 60 + Number(match[2]);
+      }
+
+      function readNumericText(value, fallback) {
+        const parsed = Number(String(value || "").replace(/[^\d.]/g, ""));
+        return Number.isFinite(parsed) ? parsed : fallback;
+      }
+
+      function defaultCheckinSnapshot(task) {
+        return {
+          seconds: 0,
+          calories: task.calories,
+          exerciseMinutes: task.exerciseMinutes,
+          thirdValue: task.distance ? task.distance : task.steps,
+          thirdIsDistance: Boolean(task.distance)
+        };
+      }
+
+      function activePhaseIndex(task, elapsedSeconds) {
+        const phases = task.phases || [];
+        let boundary = 0;
+        for (let i = 0; i < phases.length; i += 1) {
+          boundary += phases[i].minutes * 60;
+          if (elapsedSeconds < boundary) return i;
+        }
+        return Math.max(0, phases.length - 1);
+      }
+
+      function phaseIsComplete(task, phaseIndex, elapsedSeconds) {
+        const phases = task.phases || [];
+        const boundary = phases
+          .slice(0, phaseIndex + 1)
+          .reduce((sum, phase) => sum + phase.minutes * 60, 0);
+        return elapsedSeconds >= boundary;
+      }
+
+      function readCheckinSnapshot(task) {
+        const timerNode = document.querySelector("[data-timer-value]");
+        const metricNodes = document.querySelectorAll("[data-live-metric]");
+        const metricLabels = document.querySelectorAll(".live-metric .tiny");
+        const timerSeconds = parseTimerLabel(timerNode?.textContent);
+        return {
+          seconds: timerSeconds ?? state.timerSeconds ?? 0,
+          calories: readNumericText(metricNodes[0]?.textContent, task.calories),
+          exerciseMinutes: readNumericText(metricNodes[1]?.textContent, task.exerciseMinutes),
+          thirdValue: readNumericText(metricNodes[2]?.textContent, task.distance || task.steps || 0),
+          thirdIsDistance: String(metricLabels[2]?.textContent || "").includes("公里")
+        };
+      }
+
+      function startTimer() {
+        stopTimer();
+        const task = selectedTask();
+        const snapshot = state.checkinSnapshot || readCheckinSnapshot(task);
+        state.checkinSnapshot = snapshot;
+        state.timerSeconds = Math.max(0, state.timerSeconds || 0);
+        saveState();
+        const totalSeconds = task.duration * 60;
+        timerId = setInterval(() => {
+          state.timerSeconds += 1;
+          const baseline = state.checkinSnapshot || snapshot;
+          const progress = Math.min(1, Math.max(0, state.timerSeconds / totalSeconds));
+          const remainingSeconds = Math.max(0, totalSeconds - state.timerSeconds);
+          const ring = document.querySelector(".timer-ring");
+          const value = document.querySelector("[data-timer-value]");
+          if (ring) {
+            ring.style.setProperty("--move-angle", `${Math.round(progress * 360)}deg`);
+            ring.style.setProperty("--exercise-angle", `${Math.round(Math.min(1, progress * 0.92) * 360)}deg`);
+            ring.style.setProperty("--stand-angle", `${Math.round(Math.min(1, progress * 0.72) * 360)}deg`);
+          }
+          if (value) value.textContent = formatTimer(remainingSeconds);
+          const progressTrack = document.querySelector(".timer-progress-track");
+          const progressState = document.querySelector(".timer-progress-label span:first-child");
+          const progressText = document.querySelector(".timer-progress-label span:last-child");
+          if (progressTrack) progressTrack.style.setProperty("--value", `${Math.round(progress * 100)}%`);
+          if (progressState) progressState.textContent = progress >= 1 ? "已完成" : "进行中";
+          if (progressText) progressText.textContent = `${Math.round(progress * 100)}%`;
+          document.querySelectorAll(".timer-box .phase-chip").forEach((chip, index) => {
+            chip.classList.toggle("done", phaseIsComplete(task, index, state.timerSeconds));
+            chip.classList.toggle("active", index === activePhaseIndex(task, state.timerSeconds));
+          });
+          const liveValues = document.querySelectorAll("[data-live-metric]");
+          if (liveValues[0]) liveValues[0].textContent = baseline.calories;
+          if (liveValues[1]) liveValues[1].textContent = baseline.exerciseMinutes;
+          if (liveValues[2]) liveValues[2].textContent = baseline.thirdValue;
+          if (progress >= 1) {
+            stopTimer();
+            saveState();
+          }
+        }, 1000);
+      }
+
+      function stopTimer() {
+        if (timerId) clearInterval(timerId);
+        timerId = null;
+      }
+
+      function formatTimer(seconds) {
+        const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const secs = String(seconds % 60).padStart(2, "0");
+        return `${mins}:${secs}`;
+      }
+
+      function resetDemo() {
+        stopTimer();
+        safeStorageRemove();
+        state = seedState();
+        window.state = state;
+        saveState();
+        render();
+        showToast("已恢复初始状态");
+      }
+
+      function shell(content, active = "home") {
+        return `
+          <section class="screen">
+            <div class="statusbar">
+              <div class="brand"><span class="mark app-mark">${icons.app}</span><span>副本校园</span></div>
+              <span>体验模式</span>
+            </div>
+            ${content}
+          </section>
+          ${bottomNav(active)}
+        `;
+      }
+
+      function bottomNav(active) {
+        const items = [
+          ["home", "首页", icons.home],
+          ["team", "小队", icons.users],
+          ["profile", "我的", icons.user]
+        ];
+        const activeIndex = Math.max(0, items.findIndex(([route]) => route === active));
+        return `
+          <nav class="bottom-nav" style="--nav-index:${activeIndex}">
+            <div class="nav-inner">
+              ${items
+                .map(
+                  ([route, label, icon]) => `
+                  <button class="nav-btn ${active === route ? "active" : ""}" onclick="setRoute('${route}')">
+                    ${icon}<span>${label}</span>
+                  </button>
+                `
+                )
+                .join("")}
+            </div>
+          </nav>
+        `;
+      }
+
+      function welcomeScreen() {
+        return `
+          <section class="screen without-nav">
+            <div class="statusbar">
+              <div class="brand"><span class="mark app-mark">${icons.app}</span><span>副本校园</span></div>
+              <span>校园运动小队</span>
+            </div>
+            <div class="hero">
+              <div class="hero-main">
+                <div class="hero-art" aria-hidden="true">
+                  ${heroBossShowcase()}
+                </div>
+                <div class="stack">
+                  <h1>和队友一起<br />击败本周 Boss</h1>
+                  <p>把校园运动点变成小队副本：完成挑战拿道具，合力削减 Boss 血量，让坚持变成一场可见的协作。</p>
+                </div>
+              </div>
+              <div class="hero-actions">
+                <button class="btn primary" onclick="setRoute('onboarding')">${icons.play}游客体验</button>
+                <button class="btn ghost" onclick="setRoute('home')">跳过建档进入</button>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+      function onboardingScreen() {
+        const options = {
+          goal: ["坚持运动", "体测过关", "减脂塑形", "缓解压力"],
+          level: ["零基础", "偶尔运动", "规律运动"],
+          sport: ["快走", "跑步", "室内训练", "球类"],
+          time: ["早八前", "课间", "晚饭后", "睡前"]
+        };
+
+        const question = (key, title) => `
+          <div class="question panel flat">
+            <h2>${title}</h2>
+            <div class="chip-row">
+              ${options[key]
+                .map(
+                  (item) => `
+                    <button class="chip ${state.onboarding[key] === item ? "active" : ""}" onclick="answer('${key}', '${item}')">${item}</button>
+                  `
+                )
+                .join("")}
+            </div>
+          </div>
+        `;
+
+        return `
+          <section class="screen without-nav">
+            <div class="statusbar">
+              <div class="brand"><span class="mark app-mark">${icons.app}</span><span>副本校园</span></div>
+              <span>1 分钟建档</span>
+            </div>
+            <div class="stack">
+              <div class="page-title">
+                <h1>生成你的今日任务</h1>
+                <p class="sub">选择当前最接近的状态，系统会优先给低阻力任务。</p>
+              </div>
+              <div class="progress-line" style="--value: 70%"><span></span></div>
+              ${question("goal", "你现在最想解决什么？")}
+              ${question("level", "你现在的运动基础？")}
+              ${question("sport", "更愿意从哪种方式开始？")}
+              ${question("time", "哪个时间最容易坚持？")}
+              <button class="btn primary" onclick="setRoute('home')">${icons.check}生成任务卡</button>
+              <button class="btn ghost" onclick="setRoute('welcome')">返回</button>
+            </div>
+          </section>
+        `;
+      }
+
+      function homeScreen() {
+        const mainTask = selectedTask();
+        const altTasks = state.tasks.filter((task) => task.id !== mainTask.id);
+        const altTask = altTasks[0] || state.tasks[1] || mainTask;
+        const thirdTask = altTasks[1] || state.tasks[2] || mainTask;
+        const progress = currentTeamProgress();
+        const progressPct = Math.min(100, Math.round((progress / state.team.weeklyGoal) * 100));
+        const phaseIndex = Math.min(mainTask.phases.length - 1, Math.max(0, Math.floor((state.user.streak || 0) / 2)));
+        const boss = selectedBoss();
+        return shell(
+          `
+          <div class="stack">
+            <div class="panel raid-card featured" role="button" tabindex="0" onclick="setRoute('raid')" onkeydown="if(event.key === 'Enter' || event.key === ' '){ event.preventDefault(); setRoute('raid'); }">
+              <div class="raid-top">
+                <span>
+                  <span class="tiny">副本校园 · ${raidMapLabel()}</span>
+                  <h2>和小队一起完成运动任务削减 Boss</h2>
+                  <p>先完成校园运动点挑战获得道具，再选择合适时机攻击 Boss。</p>
+                </span>
+                <span class="raid-chip">${boss.weakness}弱点</span>
+              </div>
+              <div class="raid-preview">
+                ${miniRaidMap()}
+                ${bossCodexPreview()}
+              </div>
+            </div>
+
+            ${raidBattlePanel({ compact: true })}
+
+            <button class="panel activity-card" onclick="toggleRings()">
+              <div class="switch-row">
+                <h2 class="section-title">今日三环目标</h2>
+                <span class="tiny">${state.ringsExpanded ? "收起" : "点开"}</span>
+              </div>
+              <div class="activity-layout">
+                ${activityRings(mainTask)}
+                <div class="stack">
+                  ${ringsLegend(mainTask)}
+                </div>
+              </div>
+              ${state.ringsExpanded ? ringDetail(mainTask) : ""}
+            </button>
+
+            <div class="home-hero">
+              <span class="tiny">今日主任务 · ${state.onboarding.time}</span>
+              <h2>${mainTask.title}</h2>
+              <div class="task-plan">
+                <span>${mainTask.duration} 分钟 · ${mainTask.scene}</span>
+                <b>完成后 D32-602 小队 +1</b>
+              </div>
+              <div class="streak-row">
+                <span class="streak-pill">${icons.flame}<strong>${state.user.streak}</strong> 天连胜</span>
+                <span class="streak-pill">${icons.trophy}<strong>${state.user.level}</strong> 级</span>
+                <span class="streak-pill">${icons.users}<strong>${progress}</strong> / ${state.team.weeklyGoal} 次</span>
+              </div>
+              <div class="meta-grid">
+                <div class="meta"><b>${mainTask.calories}</b><span>活动 kcal</span></div>
+                <div class="meta"><b>${mainTask.exerciseMinutes} 分</b><span>运动时长</span></div>
+                <div class="meta"><b>${mainTask.standHours} h</b><span>站立活跃</span></div>
+              </div>
+              <button class="btn primary" onclick="chooseTask('${mainTask.id}'); setRoute('checkin')">${icons.play}开始打卡</button>
+            </div>
+
+            <div class="panel mission-panel stack">
+              <div class="switch-row">
+                <h2 class="section-title">今日推进路线</h2>
+                <span class="chip active">周徽章差 ${Math.max(0, state.team.weeklyGoal - progress)} 次</span>
+              </div>
+              <div class="mission-route">
+                ${mainTask.phases
+                  .map(
+                    (phase, index) => `
+                    <div class="mission-step ${index < phaseIndex ? "done" : ""} ${index === phaseIndex ? "active" : ""}">
+                      <span class="mission-dot">${index < phaseIndex ? "✓" : index + 1}</span>
+                      <b>${phase.label}</b>
+                      <small>${phase.minutes} 分钟</small>
+                    </div>
+                  `
+                  )
+                  .join("")}
+              </div>
+              <div class="mission-reward-row">
+                <span class="icon amber">${icons.trophy}</span>
+                <span>
+                  <b>完成后点亮“三环起步”进度</b>
+                  D32-602 小队 +1 次有效打卡，连胜保护继续保留。
+                </span>
+              </div>
+            </div>
+
+            <div class="panel stack">
+              <div class="switch-row">
+                <h2 class="section-title">今日训练包</h2>
+                <span class="tiny">按场景切换</span>
+              </div>
+              <div class="task-list">
+                <button class="task-item" onclick="chooseTask('${mainTask.id}')">
+                  <span class="icon">${icons.foot}</span>
+                  <span>
+                    <h3>${mainTask.title}</h3>
+                    <p>${mainTask.subtitle}</p>
+                    <div class="task-tags"><span>${mainTask.calories} kcal</span><span>${mainTask.distance} km</span><span>${mainTask.steps} 步</span></div>
+                  </span>
+                  <span class="chip ${state.selectedTaskId === mainTask.id ? "active" : ""}">主线</span>
+                </button>
+                <button class="task-item alt" onclick="chooseTask('${altTask.id}')">
+                  <span class="icon coral">${icons.flame}</span>
+                  <span>
+                    <h3>${altTask.title}</h3>
+                    <p>${altTask.subtitle}</p>
+                    <div class="task-tags"><span>${altTask.calories} kcal</span><span>${altTask.exerciseMinutes} 分</span><span>${altTask.difficulty}</span></div>
+                  </span>
+                  <span class="chip ${state.selectedTaskId === altTask.id ? "active" : ""}">切换</span>
+                </button>
+                <button class="task-item alt" onclick="chooseTask('${thirdTask.id}')">
+                  <span class="icon amber">${icons.trophy}</span>
+                  <span>
+                    <h3>${thirdTask.title}</h3>
+                    <p>${thirdTask.subtitle}</p>
+                    <div class="task-tags"><span>${thirdTask.calories} kcal</span><span>${thirdTask.distance} km</span><span>${thirdTask.difficulty}</span></div>
+                  </span>
+                  <span class="chip ${state.selectedTaskId === thirdTask.id ? "active" : ""}">进阶</span>
+                </button>
+              </div>
+            </div>
+
+              <div class="panel stack">
+                <div class="switch-row">
+                  <h2 class="section-title">本周徽章</h2>
+                  <button class="btn small ghost" onclick="setRoute('profile')">查看全部</button>
+                </div>
+              <div class="badge-grid">
+                ${badge("三环起步", "完成一次三环目标训练", icons.flame, true, "#ff375f", "#ff9f0a")}
+                ${badge("D32 助攻", "为宿舍小队贡献 3 次有效打卡", icons.users, true, "#00c7be", "#147a64")}
+                ${badge("七日连胜", "连续 7 天完成至少一个运动任务", icons.trophy, state.user.streak >= 7, "#ffd60a", "#ff9f0a")}
+              </div>
+            </div>
+
+            <div class="panel stack">
+              <div class="switch-row">
+                <h2 class="section-title">D32-602 小队进度</h2>
+                <button class="btn small ghost" onclick="setRoute('team')">查看</button>
+              </div>
+              <div class="team-meter">
+                <div class="progress-line" style="--value: ${progressPct}%"><span></span></div>
+                <p class="sub">进度 = 全队本周有效打卡次数 / 周目标。当前 ${progress} / ${state.team.weeklyGoal} 次，还差 ${Math.max(0, state.team.weeklyGoal - progress)} 次解锁周徽章。</p>
+              </div>
+            </div>
+
+            <div class="panel journey-banner">
+              <b>今天目标：完成 ${mainTask.duration} 分钟</b>
+              <span>完成后保留 ${state.user.streak} 天连胜，并让宿舍楼周挑战从 ${progress} / ${state.team.weeklyGoal} 推进到 ${Math.min(state.team.weeklyGoal, progress + 1)} / ${state.team.weeklyGoal}。</span>
+            </div>
+          </div>
+        `,
+          "home"
+        );
+      }
+
+      function checkinScreen() {
+        const task = selectedTask();
+        const snapshot = state.checkinSnapshot || defaultCheckinSnapshot(task);
+        const elapsedSeconds = Math.max(0, state.timerSeconds || 0);
+        const totalSeconds = task.duration * 60;
+        const remainingSeconds = Math.max(0, totalSeconds - elapsedSeconds);
+        const progress = totalSeconds ? Math.min(1, elapsedSeconds / totalSeconds) : 0;
+        const activeSegment = activePhaseIndex(task, elapsedSeconds);
+        const timerAngles = {
+          move: `${Math.round(progress * 360)}deg`,
+          exercise: `${Math.round(Math.min(1, progress * 0.92) * 360)}deg`,
+          stand: `${Math.round(Math.min(1, progress * 0.72) * 360)}deg`
+        };
+        return `
+          <section class="screen without-nav">
+            <div class="topbar">
+              <button class="btn small ghost" onclick="setRoute('home')">返回</button>
+              <div class="brand"><span class="mark">${icons.foot}</span><span>运动打卡</span></div>
+            </div>
+            <div class="stack">
+              <div class="page-title">
+                <h1>${task.title}</h1>
+                <p class="sub">${task.subtitle} · ${task.scene} · 完成后获得 ${task.rewardXp} XP</p>
+              </div>
+              <div class="panel timer-box">
+                <div class="metric-caption">
+                  <span>目标三环</span>
+                  <span>授权后自动校验</span>
+                </div>
+                <div class="timer-ring" style="--move-angle: ${timerAngles.move}; --exercise-angle: ${timerAngles.exercise}; --stand-angle: ${timerAngles.stand};">
+                  <span class="ring-layer move"></span>
+                  <span class="ring-layer exercise"></span>
+                  <span class="ring-layer stand"></span>
+                  <div class="timer-inner">
+                    <strong data-timer-value>${formatTimer(remainingSeconds)}</strong>
+                    <span class="tiny">目标 ${task.duration}:00</span>
+                  </div>
+                </div>
+                <div class="timer-progress">
+                  <div class="timer-progress-label">
+                    <span>${state.timerSeconds > 0 ? "进行中" : "待开始"}</span>
+                    <span>${Math.round(progress * 100)}%</span>
+                  </div>
+                  <div class="timer-progress-track" style="--value:${Math.round(progress * 100)}%"><span></span></div>
+                </div>
+                <div class="phase-strip">
+                  ${task.phases
+                    .map(
+                      (phase, index) => `
+                      <div class="phase-chip ${phaseIsComplete(task, index, elapsedSeconds) ? "done" : ""} ${index === activeSegment ? "active" : ""}">
+                        <b>${phase.label}</b>
+                        <span>${phase.minutes} 分</span>
+                      </div>
+                    `
+                    )
+                    .join("")}
+                </div>
+                <div class="metric-caption">
+                  <span>本次目标</span>
+                  <span>完成后计入小队</span>
+                </div>
+                <div class="live-metrics">
+                  <div class="live-metric"><b data-live-metric>${snapshot.calories}</b><span class="tiny">预计 kcal</span></div>
+                  <div class="live-metric"><b data-live-metric>${snapshot.exerciseMinutes}</b><span class="tiny">预计运动</span></div>
+                  <div class="live-metric"><b data-live-metric>${snapshot.thirdValue}</b><span class="tiny">${snapshot.thirdIsDistance ? "预计公里" : "预计步数"}</span></div>
+                </div>
+                <div class="chip-row">
+                  <button class="btn dark" onclick="startTimer()">${icons.play}开始</button>
+                  <button class="btn ghost" onclick="stopTimer()">暂停</button>
+                </div>
+              </div>
+
+              <div class="panel verify-panel stack">
+                <div class="switch-row">
+                  <h2 class="section-title">数据来源</h2>
+                  <span class="chip active">推荐授权</span>
+                </div>
+                <div class="source-grid">
+                  <button class="source-card" onclick="showToast('可申请读取 Apple 健康 / 手机运动数据，用于核验步数、距离和活动能量。')">
+                    <span class="icon coral">${icons.shield}</span>
+                    <span>
+                      <h3>连接手机健康数据</h3>
+                      <p>读取活动能量、运动分钟、步数/距离，避免只靠手动打卡。</p>
+                    </span>
+                    <span class="chip">申请</span>
+                  </button>
+                  <button class="source-card" onclick="showToast('支持从 Apple 健身、华为运动健康、小米运动等截图或数据导入。')">
+                    <span class="icon teal">${icons.chart}</span>
+                    <span>
+                      <h3>导入运动软件记录</h3>
+                      <p>可用截图或授权数据作为小队积分依据。</p>
+                    </span>
+                    <span class="chip">导入</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="panel stack">
+                <h2 class="section-title">手动补录</h2>
+                <p class="sub">仅作为无设备时的兜底；超过奖励阈值需要健康数据或截图佐证。</p>
+                <div class="number-row">
+                  <button class="btn ghost" onclick="state.manualMinutes = Math.max(1, state.manualMinutes - 1); saveState(); render();">${icons.minus}</button>
+                  <div class="number-display">${state.manualMinutes} 分钟</div>
+                  <button class="btn ghost" onclick="state.manualMinutes += 1; saveState(); render();">${icons.plus}</button>
+                </div>
+                <button class="btn primary" onclick="completeCheckin()">${icons.check}完成打卡</button>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+      function raidScreen() {
+        const point = selectedRaidPoint();
+        const boss = selectedBoss();
+        const hitWeakness = point.type === boss.weakness;
+        const maxHp = boss.maxHp || 500;
+        const mode = state.raidMapMode || "lake";
+        const points = sortedRaidPoints(visibleRaidPoints(mode), point.id);
+        const bosses = state.raid.bosses || [];
+        const routePlanNote = "可导入课表，按实际上课位置刷新附近运动任务点。";
+        return `
+          <section class="screen without-nav">
+            <div class="topbar">
+              <button class="btn small ghost" onclick="setRoute('home')">返回</button>
+              <div class="brand"><span class="mark app-mark">${icons.app}</span><span>副本校园</span></div>
+            </div>
+            <div class="stack">
+              <div class="page-title">
+                <h1>${boss.name}副本</h1>
+                <p class="tiny">${boss.intro}</p>
+                <p class="sub">点击校园运动挑战可获得攻击道具；每日 Boss 会刷新弱点，完成对应类型任务可造成暴击伤害。小队成员可以分头选择训练点和出手顺序，本周 Boss 池会轮换，优先击破关键目标推进宿舍进度。</p>
+              </div>
+
+              <div class="campus-map ${mode}" id="raid-map" style="background-image:url('${raidMapImage(mode)}')">
+                <div class="map-control-row">
+                  <span class="map-badge">${raidMapLabel(mode)}</span>
+                  <span class="map-toggle">
+                    <button class="${mode === "lake" ? "active" : ""}" onclick="setRaidMapMode('lake')">近景</button>
+                    <button class="${mode === "campus" ? "active" : ""}" onclick="setRaidMapMode('campus')">全图</button>
+                  </span>
+                </div>
+                ${points
+                  .map((item) => {
+                    const pos = pointPosition(item, mode);
+                    return `
+                    <button class="campus-point ${item.id === point.id ? "active" : ""}" style="--x:${pos.x};--y:${pos.y};--dot:${item.color};" onclick="selectRaidPoint('${item.id}')">
+                      <span class="point-token">${item.shortName}</span>
+                      <b>${item.name}</b>
+                      <small>${item.type}</small>
+                    </button>
+                  `
+                  })
+                  .join("")}
+              </div>
+              <div class="route-planner">
+                <button class="route-plan-btn" type="button">根据上课地点定义任务</button>
+                <p class="tiny">${routePlanNote}</p>
+              </div>
+
+              <div class="panel stack">
+                <div class="switch-row">
+                  <span>
+                    <h2 class="section-title">${point.name}挑战</h2>
+                    <p class="tiny">${point.note}</p>
+                  </span>
+                  <span class="chip ${hitWeakness ? "active" : ""}">${hitWeakness ? "弱点命中" : point.type}</span>
+                </div>
+                <div class="task-item">
+                  <span class="icon ${hitWeakness ? "coral" : "teal"}">${hitWeakness ? icons.flame : icons.foot}</span>
+                  <span>
+                    <h3>${point.task}</h3>
+                    <p>完成后获得「${point.reward}」，放入道具仓后可选择时机使用。</p>
+                    <div class="task-tags"><span>${point.type}</span><span>道具 +1</span><span>D32 贡献 +1</span></div>
+                  </span>
+                  <span class="quest-reward">+1</span>
+                </div>
+                <button class="btn primary" onclick="resolveRaidChallenge()">${icons.check}${state.raidResolved ? "再次获得道具" : "完成挑战拿道具"}</button>
+              </div>
+
+              ${raidBattlePanel()}
+
+              <div class="panel boss-codex" id="boss-codex">
+                <div class="switch-row">
+                  <h2 class="section-title">本周 Boss 图鉴</h2>
+                  <span class="tiny">点击查看弱点</span>
+                </div>
+                <div class="boss-list">
+                  ${bosses
+                    .map(
+                      (item) => `
+                      <button class="boss-card ${item.id === boss.id ? "active" : ""}" onclick="selectBoss('${item.id}')">
+                        <span class="boss-mini" style="--boss-a:${item.colorA};--boss-b:${item.colorB};--shape:${item.shape};"><i class="${item.deco || "crown"}"></i></span>
+                        <b>${item.name}</b>
+                        <small>${item.weakness}弱点</small>
+                      </button>
+                    `
+                    )
+                    .join("")}
+                </div>
+                <div class="journey-banner">
+                  <b>${boss.name} · 血量 ${boss.hp} / ${maxHp}</b>
+                  <span>${boss.intro}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+      function resultScreen() {
+        const task = selectedTask();
+        return `
+          <section class="screen without-nav">
+            <div class="result-burst">
+              <div class="medal">${icons.trophy}</div>
+              <div>
+                <h1>打卡完成</h1>
+                <p class="sub">你给 D32-602 小队贡献了 1 次，本周徽章又近了一步。</p>
+              </div>
+              <div class="stat-grid">
+                <div class="stat"><b>+${task.rewardXp}</b><span>XP</span></div>
+                <div class="stat"><b>${state.user.streak} 天</b><span>连胜</span></div>
+                <div class="stat"><b>+1</b><span>小队贡献</span></div>
+              </div>
+              <div class="panel stack">
+                <h2 class="section-title">下一次推荐</h2>
+                <p class="sub">${state.onboarding.time} 继续做 ${task.duration} 分钟，连胜到 7 天可获得“开局稳住”徽章。</p>
+              </div>
+              <div class="hero-actions">
+                <button class="btn primary" onclick="setRoute('team')">${icons.users}查看小队</button>
+                <button class="btn ghost" onclick="setRoute('home')">回到首页</button>
+              </div>
+            </div>
+          </section>
+        `;
+      }
+
+      function teamScreen() {
+        const progress = currentTeamProgress();
+        const progressPct = Math.min(100, Math.round((progress / state.team.weeklyGoal) * 100));
+        const sorted = [...state.team.members].sort((a, b) => {
+          const bScore = b.contribution * 10 + (b.minutes || 0) * 0.25 + (b.distance || 0);
+          const aScore = a.contribution * 10 + (a.minutes || 0) * 0.25 + (a.distance || 0);
+          return bScore - aScore;
+        });
+        return shell(
+          `
+          <div class="stack">
+            <div class="team-head">
+              <div class="switch-row">
+                <span class="tiny">上海交通大学 · 宿舍周挑战</span>
+                <button class="btn small ghost privacy-trigger" onclick="openPrivacyPanel()">隐私</button>
+              </div>
+              <h2>${state.team.name}</h2>
+              <p class="sub">进度按“有效打卡次数”结算；榜单展示内容由个人隐私等级决定。</p>
+              <div class="meta-grid">
+                <div class="stat"><b>${progress}</b><span>有效打卡</span></div>
+                <div class="stat"><b>${currentTeamMinutes()}</b><span>运动分钟</span></div>
+                <div class="stat"><b>${currentTeamDistance()}</b><span>公里</span></div>
+              </div>
+            </div>
+
+            <div class="panel stack">
+              <div class="switch-row">
+                <h2 class="section-title">本周进度</h2>
+                <span class="tiny">${progressPct}%</span>
+              </div>
+              <div class="progress-line" style="--value: ${progressPct}%"><span></span></div>
+              <p class="sub">已完成 ${progress} / ${state.team.weeklyGoal} 次有效打卡，还差 ${Math.max(0, state.team.weeklyGoal - progress)} 次可解锁本周宿舍徽章。</p>
+            </div>
+
+            <div class="panel stack">
+              <div class="switch-row">
+                <h2 class="section-title">周贡献榜</h2>
+                <span class="tiny">按隐私级别展示</span>
+              </div>
+              <div class="leader-list">
+                ${sorted
+                  .map(
+                    (member, index) => `
+                    <div class="leader">
+                      <span class="rank">${index + 1}</span>
+                      <span class="avatar ${member.id === state.user.id ? "me" : ""}">${member.avatar}</span>
+                      <span>
+                        <h3>${member.name}</h3>
+                        <p>${member.baseline}</p>
+                      </span>
+                      ${leaderMetrics(member)}
+                    </div>
+                  `
+                  )
+                  .join("")}
+              </div>
+            </div>
+
+            ${state.privacySheetOpen ? `
+              <div class="privacy-modal" onclick="closePrivacyPanel()">
+                <div class="privacy-sheet" onclick="event.stopPropagation()">
+                  <div class="switch-row">
+                    <div>
+                      <h3>隐私展示</h3>
+                      <p class="privacy-note">决定榜单右侧显示什么。越详细越适合熟人宿舍，越简洁越适合跨宿舍榜单。</p>
+                    </div>
+                    <button class="btn small ghost" onclick="closePrivacyPanel()">关闭</button>
+                  </div>
+                  <div class="privacy-options">
+                    <button class="privacy-option ${state.privacyMode === "minimal" ? "active" : ""}" onclick="setPrivacyMode('minimal')">
+                      <b>仅次数</b>
+                      <p>只显示有效打卡次数，适合更强调隐私的展示。</p>
+                    </button>
+                    <button class="privacy-option ${state.privacyMode === "balanced" ? "active" : ""}" onclick="setPrivacyMode('balanced')">
+                      <b>均衡</b>
+                      <p>显示次数和运动分钟，兼顾氛围和隐私。</p>
+                    </button>
+                    <button class="privacy-option ${state.privacyMode === "detailed" ? "active" : ""}" onclick="setPrivacyMode('detailed')">
+                      <b>详细</b>
+                      <p>显示次数、分钟和距离，适合熟悉的小队互相激励。</p>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ` : ""}
+          </div>
+        `,
+          "team"
+        );
+      }
+
+      function profileScreen() {
+        const records = weeklyRecords();
+        const activeRecord = records[state.selectedDay] || records[0];
+        const levelProgress = Math.min(100, ((state.user.xp % 120) / 120) * 100);
+        return shell(
+          `
+          <div class="stack">
+            <div class="profile-head">
+              <div class="profile-avatar">J</div>
+              <div class="page-title">
+                <h1>Jupiter</h1>
+                <p class="sub">Lv.${state.user.level} · ${state.user.xp} XP · ${state.user.points} 积分 · D32-602 小队</p>
+              </div>
+            </div>
+
+            <div class="panel stack">
+              <div class="switch-row">
+                <h2 class="section-title">等级进度</h2>
+                <span class="tiny">距下一级 ${120 - (state.user.xp % 120)} XP</span>
+              </div>
+              <div class="progress-line" style="--value: ${levelProgress}%"><span></span></div>
+              <div class="stat-grid">
+                <div class="stat"><b>${state.user.streak}</b><span>连续天数</span></div>
+                <div class="stat"><b>${state.checkins.filter((item) => item.userId === state.user.id).length}</b><span>累计打卡</span></div>
+                <div class="stat"><b>${state.user.points}</b><span>可用积分</span></div>
+              </div>
+            </div>
+
+            <div class="panel stack">
+              <div class="switch-row">
+                <h2 class="section-title">本周日历</h2>
+                <span class="tiny">点击查看记录</span>
+              </div>
+              <div class="week-grid">
+                ${records
+                  .map(
+                    (record, index) => `
+                    <button class="day ${record.status === "完成" ? "done" : ""} ${record.status === "未完成" ? "missed" : ""} ${record.status === "未开始" ? "future" : ""} ${state.selectedDay === index ? "active" : ""}" onclick="setSelectedDay(${index})">
+                      <b>${record.day}</b>
+                      <span>${record.status}</span>
+                    </button>
+                  `
+                  )
+                  .join("")}
+              </div>
+              <div class="day-detail">
+                <span class="icon teal">${activeRecord.status === "完成" ? icons.check : icons.play}</span>
+                <span>
+                  <h3>${activeRecord.title}</h3>
+                  <p>${activeRecord.detail}</p>
+                </span>
+                <b>${activeRecord.minutes} 分</b>
+              </div>
+              <p class="tiny">距离 ${activeRecord.distance || 0} km · 记录用于成长反馈，不做公开全校排名。</p>
+            </div>
+
+            <div class="panel stack">
+              <h2 class="section-title">徽章</h2>
+              <div class="badge-grid">
+                ${badge("三环起步", "完成一次三环目标训练", icons.flame, true, "#ff375f", "#ff9f0a")}
+                ${badge("D32 助攻", "为宿舍小队贡献 3 次有效打卡", icons.users, true, "#00c7be", "#147a64")}
+                ${badge("周六补位", "在周末补齐一次计划内训练", icons.check, true, "#64d2ff", "#0a84ff")}
+                ${badge("七日连胜", "连续 7 天完成至少一个运动任务", icons.trophy, state.user.streak >= 7, "#ffd60a", "#ff9f0a")}
+                ${badge("体测预备", "完成 3 次体测心肺唤醒训练", icons.chart, false, "#bf5af2", "#5e5ce6")}
+                ${badge("隐私守护", "开启榜单隐私展示设置", icons.shield, true, "#8e8e93", "#3a3a3c")}
+              </div>
+            </div>
+
+            <div class="panel stack">
+              <h2 class="section-title">奖励</h2>
+              <div class="reward-list">
+                ${reward("补签卡", "80 积分", icons.rotate)}
+                ${reward("操场夜跑贴纸", "120 积分", icons.gift)}
+              </div>
+            </div>
+
+            <div class="panel stack">
+              <div class="switch-row">
+                <span>
+                  <h2 class="section-title">个性化任务</h2>
+                  <p class="tiny">关闭后按通用低门槛任务分发</p>
+                </span>
+                <button class="switch ${state.recommendationsOn ? "" : "off"}" onclick="state.recommendationsOn = !state.recommendationsOn; saveState(); render();">
+                  <span></span>
+                </button>
+              </div>
+              <button class="btn ghost" onclick="resetDemo()">${icons.rotate}恢复初始数据</button>
+              <button class="btn ghost" onclick="showToast('基础任务不采集定位和健康数据，后续授权可随时关闭。')">${icons.shield}隐私说明</button>
+            </div>
+          </div>
+        `,
+          "profile"
+        );
+      }
+
+      function badge(label, description, icon, unlocked, colorA = "#147a64", colorB = "#1f9d78") {
+        return `
+          <button class="badge ${unlocked ? "" : "locked"}" style="--badge-a:${colorA};--badge-b:${colorB};" onclick="showBadgeInfo('${label}', '${description}')">
+            <span class="badge-icon">${icon}</span>
+            <b>${label}</b>
+            <p>${unlocked ? description : "未解锁：" + description}</p>
+          </button>
+        `;
+      }
+
+      function reward(title, cost, icon) {
+        return `
+          <div class="reward">
+            <span class="icon amber">${icon}</span>
+            <span>
+              <h3>${title}</h3>
+              <p>${cost}</p>
+            </span>
+            <button class="btn small ghost" onclick="showToast('已加入兑换清单')">兑换</button>
+          </div>
+        `;
+      }
+
+      function render() {
+        const routes = {
+          welcome: welcomeScreen,
+          onboarding: onboardingScreen,
+          home: homeScreen,
+          raid: raidScreen,
+          checkin: checkinScreen,
+          result: resultScreen,
+          team: teamScreen,
+          profile: profileScreen
+        };
+        document.getElementById("app").innerHTML = (routes[state.route] || homeScreen)();
+      }
+
+      function showFallback(error) {
+        const app = document.getElementById("app");
+        const message = error && error.message ? error.message : "未知初始化错误";
+        app.innerHTML = `
+          <section class="screen without-nav">
+            <div class="statusbar">
+              <div class="brand"><span class="mark app-mark">${icons.app}</span><span>副本校园</span></div>
+              <span>快速恢复</span>
+            </div>
+            <div class="panel stack" style="margin-top: 20vh;">
+              <h1 style="margin: 0; font-size: 28px;">页面刚刚卡住了</h1>
+              <p class="sub">当前浏览器可能限制了本地文件存储。点击下面按钮会用初始数据重新进入。</p>
+              <p class="tiny">错误信息：${message}</p>
+              <button class="btn primary" onclick="state = seedState(); render();">${icons.play}重新进入</button>
+            </div>
+          </section>
+        `;
+      }
+
+      window.setRoute = setRoute;
+      window.chooseTask = chooseTask;
+      window.answer = answer;
+      window.startTimer = startTimer;
+      window.stopTimer = stopTimer;
+      window.completeCheckin = completeCheckin;
+      window.setRaidMapMode = setRaidMapMode;
+      window.selectRaidPoint = selectRaidPoint;
+      window.selectBoss = selectBoss;
+      window.openRaidSection = openRaidSection;
+      window.useRaidTool = useRaidTool;
+      window.resetDemo = resetDemo;
+      window.showToast = showToast;
+      window.state = state;
+      window.saveState = saveState;
+      window.render = render;
+
+      window.addEventListener("error", (event) => showFallback(event.error || event.message));
+
+      try {
+        render();
+      } catch (error) {
+        showFallback(error);
+      }
+    </script>
+  </body>
+</html>
